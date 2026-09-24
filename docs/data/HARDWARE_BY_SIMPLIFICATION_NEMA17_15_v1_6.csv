@@ -1,0 +1,5 @@
+level,624ZZ_ring_bearings,4mm_ring_axles,6000ZZ_ecc_bearings,625ZZ_output_bearings,5mm_output_pins,6814ZZ_flange_bearing,printed_plain_journals
+0 - Full hardware,32,16,2,12,6,1,none
+1 - Integrated ring ridges,0,0,2,12,6,1,ring ridges only
+2 - Direct pin and cam contact,0,0,0,0,6,1,ring ridges + direct cam/pin contact
+3 - Bearingless printed journals,0,0,0,0,6,0,ring ridges + rear input shaft journal + output hub journal

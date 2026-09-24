@@ -1,0 +1,1 @@
+Parametric OpenSCAD pancake cycloidal gearbox for NEMA steppers, with CNC/3D-print variants, catalog bearings, commodity rod sizes, BOM/cut-list output, and animated kinematics.

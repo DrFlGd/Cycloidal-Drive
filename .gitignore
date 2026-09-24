@@ -1,0 +1,13 @@
+# OpenSCAD generated/exported files
+*.stl
+*.3mf
+*.amf
+*.off
+*.csg
+*.dxf
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*~

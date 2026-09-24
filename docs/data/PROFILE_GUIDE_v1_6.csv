@@ -1,0 +1,12 @@
+profile,motor_frame,torque_class,ratio,default_ring_system,auto_ring_bearing,auto_ecc_bearing,auto_output_roller,auto_flange_bearing,notes
+NEMA17 Commodity 15:1,NEMA17,Medium,15,Standard miniature bearings,624ZZ,6000ZZ,625ZZ,6814ZZ,Commodity-focused 4 mm ring rod / 5 mm output rod profile
+NEMA17 Light 11:1,NEMA17,Light,11,Selectable; default Standard miniature bearings,685VV,61801,624,61813,Restored standard profile
+NEMA17 Medium 21:1,NEMA17,Medium,21,Selectable; default Standard miniature bearings,686AVV,61901,605,61813,Restored standard profile
+NEMA17 Heavy 29:1,NEMA17,Heavy,29,Selectable; default Standard miniature bearings,688AVV,61902,626,61817,Restored standard profile
+NEMA23 Light 11:1,NEMA23,Light,11,Selectable; default Standard miniature bearings,686AVV,61901,626,61816,Restored standard profile
+NEMA23 Medium 18:1,NEMA23,Medium,18,Selectable; default Standard miniature bearings,688AVV,61902,608,61818,Restored standard profile
+NEMA23 Heavy 29:1,NEMA23,Heavy,29,Selectable; default Standard miniature bearings,6800VV,61903,6000,61821,Restored standard profile
+NEMA34 Light 11:1,NEMA34,Light,11,Selectable; default Standard miniature bearings,688AVV,61805,608,61822,Restored standard profile
+NEMA34 Medium 21:1,NEMA34,Medium,21,Selectable; default Standard miniature bearings,6800VV,61805,6000,61824,Restored standard profile
+NEMA34 Heavy 29:1,NEMA34,Heavy,29,Selectable; default Standard miniature bearings,6801VV,61806,6001,61828,Restored standard profile
+Parametric manual,User selected,User selected,11/13/15/17/18/21/25/29/Custom,User selected,User selected,User selected,User selected,User selected,Full individual configurator controls
