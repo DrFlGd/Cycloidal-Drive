@@ -1,0 +1,4 @@
+input_shaft_mode,coupled_eccentric_mode,description,motor_offset,eccentric_parts,assembly_note
+Direct motor shaft,Separate eccentric sleeves,Motor shaft passes directly through two eccentric sleeves,0 mm,2 sleeves + 2 eccentric set screws,Shortest package; motor shaft must reach full eccentric stack
+Machined coupled shaft,Separate eccentric sleeves,Stepped coupled shaft with female motor socket; original eccentric sleeves retained,Editable / preset-populated,1 coupled shaft + 2 sleeves + 2 eccentric set screws,Simpler lathe work; sleeves must be phased 180 degrees during assembly
+Machined coupled shaft,Integrated double eccentric,One-piece coupled shaft carries two integral eccentric journals 180 degrees apart,Editable / preset-populated,1 integrated shaft; no eccentric sleeves/set screws,Rear bearing/disc installs from coupling end; front bearing/disc installs from front
