@@ -1,0 +1,56 @@
+name: Render OpenSCAD documentation
+
+on:
+  push:
+    branches: [v1.8-case-lobes-presets]
+    paths:
+      - 'src/cnc_nema_cycloidal_gearbox_pancake_v1_8.scad'
+      - 'src/cnc_nema_cycloidal_gearbox_pancake_v1_8.json'
+      - '.github/workflows/render-openscad-docs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install OpenSCAD render dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y openscad xvfb imagemagick
+      - name: Render full-resolution lossless PNGs
+        run: |
+          set -e
+          SCAD=src/cnc_nema_cycloidal_gearbox_pancake_v1_8.scad
+          PARAMS=src/cnc_nema_cycloidal_gearbox_pancake_v1_8.json
+          PRESET="NEMA17 Commodity R15"
+          mkdir -p docs/images
+          xvfb-run -a openscad -q -o docs/images/assembly_v1_8.png --imgsize=1600,1200 --viewall --autocenter -p "$PARAMS" -P "$PRESET" -D 'part="assembly"' "$SCAD"
+          xvfb-run -a openscad -q -o docs/images/exploded_v1_8.png --imgsize=1600,1200 --viewall --autocenter -p "$PARAMS" -P "$PRESET" -D 'part="exploded"' "$SCAD"
+          xvfb-run -a openscad -q -o docs/images/input_stack_v1_8.png --imgsize=1600,1200 --viewall --autocenter -p "$PARAMS" -P "$PRESET" -D 'part="input_stack"' "$SCAD"
+          xvfb-run -a openscad -q -o docs/images/layout_3d_v1_8.png --imgsize=1800,1200 --viewall --autocenter -p "$PARAMS" -P "$PRESET" -D 'part="layout_3d"' "$SCAD"
+          xvfb-run -a openscad -q -o docs/images/case_rooted_lobes_top_v1_8.png --imgsize=1400,1400 --projection=o --camera=0,0,0,0,0,0,180 --viewall --autocenter -p "$PARAMS" -P "$PRESET" -D 'part="case_ring"' -D 'simplification_level="Integrated case lobes"' "$SCAD"
+          xvfb-run -a openscad -q -o docs/images/simplified_lobes_assembly_v1_8.png --imgsize=1600,1200 --viewall --autocenter -p "$PARAMS" -P "$PRESET" -D 'part="assembly"' -D 'simplification_level="Integrated case lobes"' "$SCAD"
+      - name: Render motion GIF
+        run: |
+          set -e
+          SCAD=src/cnc_nema_cycloidal_gearbox_pancake_v1_8.scad
+          PARAMS=src/cnc_nema_cycloidal_gearbox_pancake_v1_8.json
+          mkdir -p docs/images/motion_frames
+          cd docs/images/motion_frames
+          xvfb-run -a openscad -q -o frame.png --animate 24 --imgsize=800,640 --viewall --autocenter -p ../../../"$PARAMS" -P "NEMA17 Commodity R15" -D 'part="motion_demo"' ../../../"$SCAD"
+          convert -delay 10 -loop 0 frame*.png ../motion_demo_v1_8.gif
+          cd ../../..
+          rm -rf docs/images/motion_frames
+      - name: Commit rendered documentation
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/images
+          if ! git diff --cached --quiet; then
+            git commit -m "Render v1.8 OpenSCAD documentation images"
+            git push
+          fi
