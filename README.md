@@ -2,7 +2,7 @@
 
 A configurable **OpenSCAD cycloidal reducer** for NEMA stepper motors, with CNC-oriented bearing-supported builds and progressively simplified 3D-printable variants.
 
-**Current design version: v1.9**
+**Current design version: v1.10**
 
 ## Assembly
 
@@ -10,78 +10,96 @@ A configurable **OpenSCAD cycloidal reducer** for NEMA stepper motors, with CNC-
 
 The output carrier is the external face flange, giving a short pancake package without a long projecting output shaft.
 
-## Machined coupled input shaft — v1.9
+## What changed in v1.10
 
-v1.9 adds a second input architecture for motors whose stock shaft is too short or inconvenient for the full eccentric stack.
+v1.10 integrates the two eccentric cams into the machined coupled input shaft. The earlier separate-sleeve coupled input remains selectable.
 
-`input_shaft_mode` now offers:
+### One-piece double-eccentric input shaft
 
-- `Direct motor shaft` — preserves the original compact architecture.
-- `Machined coupled shaft` — uses a stepped fabricated shaft with a female socket over the existing motor shaft.
+Set input_shaft_mode to **Machined coupled shaft** and coupled_eccentric_mode to **Integrated double eccentric**.
 
-The coupled shaft keeps a configurable gearbox-side drive diameter for the existing eccentric sleeves, while a larger rear hub provides the motor-shaft socket and radial locking screws. A registered NEMA spacer moves the gearbox away from the motor by the required amount.
+The machined part combines the female socket for the existing motor shaft, coupling hub and locking screws, concentric shaft core, and **two integral eccentric journals machined 180° apart**. Their phase is therefore fixed by the part itself rather than by two independently adjusted eccentric sleeves.
 
-The spacer includes a **motor-side pilot pocket** and a **gearbox-side locating boss**, so the offset does not rely only on the four mounting screws for concentric alignment.
+The existing v1.9 registered motor spacer is retained:
 
-For the default NEMA17 commodity values, the coupled-input starting point is:
+![Coupled input stack](docs/images/coupled_input_stack_v1_9.png)
 
-| Parameter | Default |
-| --- | ---: |
-| Motor shaft | 5 mm × 20 mm protrusion |
-| Gearbox drive shaft | 5 mm |
-| Coupling hub OD | 12 mm |
-| Female socket | 5.05 mm × 10 mm deep |
-| Locking | 2 × M3 radial set screws |
-| Motor offset | 22.5 mm |
-| Socket engagement | 9.5 mm |
-| Blind-end clearance | 0.5 mm |
+![Coupled-input assembly](docs/images/coupled_input_assembly_v1_9.png)
 
-The relevant dimensions are all exposed in the Customizer: motor shaft protrusion and pilot height, drive-shaft diameter, hub OD, socket depth/clearance, minimum engagement, motor offset, locating-boss height, and set-screw size/count. The named NEMA presets populate starting values for these controls, and the values remain editable after loading a preset.
+The coupled_input_shaft part output now changes with coupled_eccentric_mode:
 
-The `part` selector also includes `motor_standoff_plate`, `motor_standoff_pilot_pocket_template`, and `coupled_input_shaft`.
+- **Integrated double eccentric** — one machined shaft, no eccentric sleeves or eccentric set screws.
+- **Separate eccentric sleeves** — the v1.9 arrangement, easier to turn on simple equipment but requiring two sleeves to be phased 180° during assembly.
 
-See [`INPUT_SHAFT_OPTIONS_v1_9.csv`](docs/data/INPUT_SHAFT_OPTIONS_v1_9.csv) and [`PROFILE_GUIDE_v1_9.csv`](docs/data/PROFILE_GUIDE_v1_9.csv).
+### Assembly path for the integrated shaft
 
-## What changed in v1.8
+A one-piece double-eccentric shaft creates an important assembly constraint: the rear cycloid bearing cannot pass over the front eccentric journal. v1.10 therefore sizes and checks the coupling end so the rear cycloid/bearing can be installed from the motor/coupling end.
 
-Two configurator areas were reworked:
+The intended sequence is:
 
-1. **Simplified ring contacts now use case-rooted lobes.** The circular contact surface is preserved, but each printed lobe flares into a broad root that overlaps the case wall instead of hanging from a thin stem.
-2. **Profiles are real OpenSCAD Customizer presets.** The companion JSON file contains named parameter sets. Selecting one fills the actual numeric and hardware fields in the Customizer, and those fields remain editable afterward.
+1. Press the rear eccentric bearing into the rear cycloid disc.
+2. Slide that disc/bearing over the coupling end and onto the rear eccentric journal.
+3. Slide the rear plate and registered motor spacer over the coupling end behind the rear disc.
+4. Install the front cycloid/bearing from the front onto the front eccentric journal.
+5. Couple the shaft socket to the motor shaft and tighten the radial locking screws.
 
-### Case-rooted printed lobes
+The model asserts that the coupling hub is smaller than the rear bearing ID—or the direct-contact cycloid bore at simplified levels—by the configured assembly clearance.
+
+### New integrated-shaft controls
+
+- coupled_eccentric_mode
+- integrated_coupling_hub_od_setting
+- integrated_rear_assembly_clearance
+- integrated_front_extension
+
+The named NEMA presets populate starting values for the integrated coupling hub. All values remain editable after loading the preset.
+
+See [INPUT_SHAFT_OPTIONS_v1_10.csv](docs/data/INPUT_SHAFT_OPTIONS_v1_10.csv), [PROFILE_GUIDE_v1_10.csv](docs/data/PROFILE_GUIDE_v1_10.csv), and [INTEGRATED_SHAFT_NOTES_v1_10.md](docs/data/INTEGRATED_SHAFT_NOTES_v1_10.md).
+
+## Machined coupled input
+
+input_shaft_mode still offers:
+
+- **Direct motor shaft** — the shortest arrangement.
+- **Machined coupled shaft** — a fabricated input with a female socket over the existing motor shaft and a registered motor spacer.
+
+For the default NEMA17 commodity profile, the coupled-input starting point remains a 5 mm motor shaft, 10 mm socket depth, 22.5 mm motor offset, and M3 locking screws. In integrated mode the coupling hub is reduced to **9.5 mm OD** so the 10 mm-ID rear 6000ZZ bearing can pass over it during assembly.
+
+## Case-rooted simplified lobes
+
+The case-rooted printed lobe geometry remains the default simplified ring-contact system.
 
 ![Case-rooted lobe geometry](docs/images/case_rooted_lobes_top_v1_8.png)
 
-The lobe root can be tuned with `printed_lobe_root_fraction`, `printed_lobe_embed_depth`, and `printed_lobe_cavity_overlap`. The previous narrow-bridge geometry remains available as `Legacy narrow bridges`.
-
-![Simplified lobe assembly](docs/images/simplified_lobes_assembly_v1_8.png)
+The contact circle stays at the correct cycloid generating radius while the root flares into the case wall for a stronger printed structure.
 
 ## Customizer presets
 
-Keep the SCAD and JSON files together in `src/`. Use the **Preset** drop-down at the top of OpenSCAD's Customizer.
+Keep the SCAD and JSON files together:
 
-Supplied sets: NEMA17 Commodity R15; NEMA17 Light R11; NEMA17 Medium R21; NEMA17 Heavy R29; NEMA23 Light R11; NEMA23 Medium R18; NEMA23 Heavy R29; NEMA34 Light R11; NEMA34 Medium R21; NEMA34 Heavy R29.
+- src/cnc_nema_cycloidal_gearbox_pancake_v1_10.scad
+- src/cnc_nema_cycloidal_gearbox_pancake_v1_10.json
 
-Preset names use `R15`, `R18`, etc. instead of `15:1` so the Customizer does not confuse the colon with range syntax.
+Use the **Preset** drop-down in OpenSCAD's Customizer. The supplied sets are:
 
-A preset updates the motor dimensions, ratio, torque class, catalog bearing selections, ring pitch, eccentricity, disc thickness, output-pin radius, plate thicknesses, housing radius, tie-bolt geometry, and center bore. After selection, each populated control remains editable.
+- NEMA17 Commodity R15
+- NEMA17 Light R11
+- NEMA17 Medium R21
+- NEMA17 Heavy R29
+- NEMA23 Light R11
+- NEMA23 Medium R18
+- NEMA23 Heavy R29
+- NEMA34 Light R11
+- NEMA34 Medium R21
+- NEMA34 Heavy R29
 
-See [`PROFILE_GUIDE_v1_8.csv`](docs/data/PROFILE_GUIDE_v1_8.csv).
+A preset writes literal values into the motor, ratio, bearing, housing, cycloid, and input-coupling controls. After selection, every populated field remains editable.
 
 ## Motion
 
-The motion section is a single animated GIF rendered from OpenSCAD.
-
 ![OpenSCAD motion animation](docs/images/motion_demo_v1_8.gif)
 
-The animation is prescribed kinematics, not a force/contact simulation.
-
-## Input stack
-
-![Input stack](docs/images/input_stack_v1_8.png)
-
-The central gearbox input is the NEMA motor's own shaft. Each cycloid disc uses an eccentric sleeve phased 180° from the other.
+The animation is prescribed kinematics: it rotates the motor/input shaft and eccentric system, orbits and counter-rotates the two cycloid discs, and advances the output flange at the selected reduction ratio. It is not a force/contact simulation.
 
 ## Simplification levels
 
@@ -92,22 +110,45 @@ The central gearbox input is the NEMA motor's own shaft. Each cycloid disc uses 
 | **Direct pin and cam contact** | Printed case-rooted lobes | Direct sliding cam | Smooth pins | Large output bearing |
 | **Bearingless printed journals** | Printed case-rooted lobes | Direct sliding cam | Smooth pins | Printed plain journal |
 
+The integrated double-eccentric shaft works with all four simplification levels. At Levels 2–3, its eccentric journals become direct sliding cam surfaces rather than bearing journals.
+
 ## Default commodity profile
 
-The `NEMA17 Commodity R15` preset uses 624ZZ ring rollers on 4 mm rod, 625ZZ output rollers on 5 mm rod, 6000ZZ eccentric bearings, and a 6814ZZ output-flange bearing.
+The NEMA17 Commodity R15 preset uses:
 
-## Exploded and manufacturing views
+| Function | Hardware |
+| --- | --- |
+| Motor/input | NEMA 17, 5 mm motor shaft |
+| Ring rollers | 624ZZ, 4 × 13 × 5 mm |
+| Ring axles | 4 mm precision smooth rod |
+| Output rollers | 625ZZ, 5 × 16 × 5 mm |
+| Output pins | 5 mm precision smooth rod |
+| Eccentric bearings | 6000ZZ, 10 × 26 × 8 mm |
+| Output flange bearing | 6814ZZ, 70 × 90 × 10 mm |
+| Reduction | 15:1 |
+
+## Views and manufacturing output
 
 ![Exploded view](docs/images/exploded_v1_8.png)
 
 ![Separated 3D layout](docs/images/layout_3d_v1_8.png)
 
+The OpenSCAD manufacturing report now includes integrated-journal OD and length, ± eccentric offsets, journal axial positions, minimum blank OD, rear assembly-passage diameter, socket geometry, set-screw drilling, registered spacer geometry, and motor offset.
+
+When integrated mode is selected, eccentric_A and eccentric_B report quantity zero and are omitted from generated part geometry because those journals are machined into the input shaft.
+
 ## Validation
 
-The v1.8 source was compiled locally across all 10 supplied presets and all four simplification modes: **40/40 combinations passed the current geometry assertions**.
+v1.10 was compiled across all **10 named presets × 4 simplification levels × 3 input/eccentric architectures**:
 
-These checks are geometric only. They are not torque, fatigue, thermal, bearing-life, or safety ratings.
+- direct motor shaft + separate eccentric sleeves,
+- coupled shaft + separate eccentric sleeves,
+- coupled shaft + integrated double eccentric.
+
+**120/120 combinations pass the current OpenSCAD geometry assertions.** See [profile_input_eccentric_simplification_validation_v1_10.csv](docs/data/profile_input_eccentric_simplification_validation_v1_10.csv).
+
+These checks are geometric and assembly-clearance checks only. They are not torque, fatigue, thermal, bearing-life, shaft-coupling, journal-surface, or safety ratings. The one-piece eccentric shaft requires appropriate material, bearing-journal tolerance and surface finish, and a machining method capable of holding both eccentricity and 180° phase.
 
 ## Project status
 
-**Prototype / engineering development.** Before structural or safety-critical use, validate contact stress, output-pin loading, bearing life, fits, lubrication, fatigue, thermal behavior, fastener preload, and the actual motor shaft/pilot dimensions for the application.
+**Prototype / engineering development.**
