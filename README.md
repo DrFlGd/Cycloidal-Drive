@@ -4,7 +4,7 @@ A configurable **OpenSCAD cycloidal reducer** designed around a compact pancake 
 
 **Current design version: v1.6**
 
-![Four simplification levels](docs/images/simplification_levels_v1_6.svg)
+![OpenSCAD assembly render](docs/images/assembly_render.jpg)
 
 ## What this project is
 
@@ -25,7 +25,7 @@ The model is fully parametric in OpenSCAD and includes:
 
 ## Motion
 
-![Kinematic motion views](docs/images/motion_path_v1_6.svg)
+![OpenSCAD motion demo render](docs/images/motion_demo_render.jpg)
 
 The OpenSCAD animation is a **prescribed kinematic animation**. It rotates the motor shaft and eccentric cams, orbits/counter-rotates both cycloid discs, and advances the output flange according to the selected reduction ratio.
 
@@ -68,7 +68,7 @@ The same gearbox geometry can be progressively simplified for printing and exper
 | **2 – Direct pin/cam contact** | Printed case ridges | Direct sliding cam | Smooth pins | Large output bearing | 1 |
 | **3 – Bearingless journals** | Printed case ridges | Direct sliding cam | Smooth pins | Printed plain journal | 0 |
 
-![Simplification progression](docs/images/pancake_architecture_v1_6.svg)
+![OpenSCAD simplification renders](docs/images/simplification_levels_render.jpg)
 
 ### Intended use of simplified versions
 
@@ -101,7 +101,7 @@ The `part` selector can generate functional or manufacturing-oriented views, inc
 
 The separated layout is useful for understanding what is purchased versus machined/printed. At the most simplified level it looks like this:
 
-![Separated 3D layout](docs/images/layout_3d_v1_6.svg)
+![OpenSCAD separated 3D layout](docs/images/layout_3d_render.jpg)
 
 ## CNC and manufacturing output
 
