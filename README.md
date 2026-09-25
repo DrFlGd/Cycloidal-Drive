@@ -1,186 +1,81 @@
 # Parametric Pancake Cycloidal Gearbox
 
-A configurable **OpenSCAD cycloidal reducer** designed around a compact pancake form factor, NEMA stepper motors, real-world commodity bearings/shafting, CNC-friendly plate geometry, and progressively simplified 3D-printable variants.
+A configurable **OpenSCAD cycloidal reducer** for NEMA stepper motors, with CNC-oriented bearing-supported builds and progressively simplified 3D-printable variants.
 
-**Current design version: v1.6**
+**Current design version: v1.8**
 
-![OpenSCAD assembly render](docs/images/assembly_render.jpg)
+## Assembly
 
-## What this project is
+![OpenSCAD assembly render](docs/images/assembly_v1_8.png)
 
-The design started as a CNC-oriented aluminum cycloidal gearbox and evolved toward a short, face-output **pancake reducer**. The rotating output carrier is the external output flange, so a driven mechanism can bolt directly to the gearbox face instead of coupling to a long projecting output shaft.
+The output carrier is the external face flange, giving a short pancake package without a long projecting output shaft.
 
-The model is fully parametric in OpenSCAD and includes:
+## What changed in v1.8
 
-- NEMA 17, NEMA 23, and NEMA 34 starting profiles
-- common reduction ratios and a manual/custom mode
-- Light / Medium / Heavy construction presets
-- catalog-driven bearing selections
-- standard smooth-rod / dowel-pin diameters
-- a commodity-focused NEMA 17 profile
-- full assembly, exploded, 2D, 3D-layout, input-stack, and motion-demo views
-- `$t`-driven kinematic animation
-- CNC cut-list and hardware/BOM reporting
-- four cumulative simplification levels for printed prototypes
+Two configurator areas were reworked:
+
+1. **Simplified ring contacts now use case-rooted lobes.** The circular contact surface is preserved, but each printed lobe flares into a broad root that overlaps the case wall instead of hanging from a thin stem.
+2. **Profiles are real OpenSCAD Customizer presets.** The companion JSON file contains named parameter sets. Selecting one fills the actual numeric and hardware fields in the Customizer, and those fields remain editable afterward.
+
+### Case-rooted printed lobes
+
+![Case-rooted lobe geometry](docs/images/case_rooted_lobes_top_v1_8.png)
+
+The lobe root can be tuned with `printed_lobe_root_fraction`, `printed_lobe_embed_depth`, and `printed_lobe_cavity_overlap`. The previous narrow-bridge geometry remains available as `Legacy narrow bridges`.
+
+![Simplified lobe assembly](docs/images/simplified_lobes_assembly_v1_8.png)
+
+## Customizer presets
+
+Keep the SCAD and JSON files together in `src/`. Use the **Preset** drop-down at the top of OpenSCAD's Customizer.
+
+Supplied sets: NEMA17 Commodity R15; NEMA17 Light R11; NEMA17 Medium R21; NEMA17 Heavy R29; NEMA23 Light R11; NEMA23 Medium R18; NEMA23 Heavy R29; NEMA34 Light R11; NEMA34 Medium R21; NEMA34 Heavy R29.
+
+Preset names use `R15`, `R18`, etc. instead of `15:1` so the Customizer does not confuse the colon with range syntax.
+
+A preset updates the motor dimensions, ratio, torque class, catalog bearing selections, ring pitch, eccentricity, disc thickness, output-pin radius, plate thicknesses, housing radius, tie-bolt geometry, and center bore. After selection, each populated control remains editable.
+
+See [`PROFILE_GUIDE_v1_8.csv`](docs/data/PROFILE_GUIDE_v1_8.csv).
 
 ## Motion
 
-![OpenSCAD motion demo render](docs/images/motion_demo_render.jpg)
+The motion section is a single animated GIF rendered from OpenSCAD.
 
-The OpenSCAD animation is a **prescribed kinematic animation**. It rotates the motor shaft and eccentric cams, orbits/counter-rotates both cycloid discs, and advances the output flange according to the selected reduction ratio.
+![OpenSCAD motion animation](docs/images/motion_demo_v1_8.gif)
 
-In OpenSCAD:
+The animation is prescribed kinematics, not a force/contact simulation.
 
-1. Set `part = "motion_demo"`.
-2. Enable `animate_preview`.
-3. Open **View → Animate**.
-4. Try 60–120 steps at 20–30 FPS.
+## Input stack
 
-This is not a force/contact simulation; it does not calculate bearing load, stress, friction, efficiency, or elastic deformation.
+![Input stack](docs/images/input_stack_v1_8.png)
 
-## Default commodity profile
-
-The `NEMA17 Commodity 15:1` profile is intended to be buildable from common hobby/mechanical components rather than unusual specialty hardware.
-
-| Function | Default hardware |
-| --- | --- |
-| Motor/input | NEMA 17, 5 mm motor shaft |
-| Ring rollers | 624ZZ, 4 × 13 × 5 mm |
-| Ring axles | 4 mm precision smooth rod |
-| Output rollers | 625ZZ, 5 × 16 × 5 mm |
-| Output pins | 5 mm precision smooth rod |
-| Eccentric bearings | 6000ZZ, 10 × 26 × 8 mm |
-| Output flange bearing | 6814ZZ, 70 × 90 × 10 mm |
-| Reduction | 15:1 |
-
-The central gearbox input shaft is the **stepper motor shaft itself**. Each cycloid disc uses an eccentric sleeve phased 180° from the other.
-
-See [`STANDARD_PART_LIBRARY_v1_6.csv`](docs/data/STANDARD_PART_LIBRARY_v1_6.csv) and the default [`HARDWARE_BOM`](docs/data/HARDWARE_BOM_NEMA17_15_COMMODITY_FULL_HARDWARE_v1_6.csv) for the design's catalog/stock definitions.
+The central gearbox input is the NEMA motor's own shaft. Each cycloid disc uses an eccentric sleeve phased 180° from the other.
 
 ## Simplification levels
 
-The same gearbox geometry can be progressively simplified for printing and experimentation.
+| Level | Ring contact | Eccentric support | Output-pin contact | Output support |
+| --- | --- | --- | --- | --- |
+| **Full hardware** | Catalog ring bearings / sleeves | Ball bearings | Roller bearings | Large output bearing |
+| **Integrated case lobes** | Printed case-rooted lobes | Ball bearings | Roller bearings | Large output bearing |
+| **Direct pin and cam contact** | Printed case-rooted lobes | Direct sliding cam | Smooth pins | Large output bearing |
+| **Bearingless printed journals** | Printed case-rooted lobes | Direct sliding cam | Smooth pins | Printed plain journal |
 
-| Level | Ring contact | Eccentric support | Output-pin contact | Output support | Default gearbox bearings |
-| --- | --- | --- | --- | --- | ---: |
-| **0 – Full hardware** | Catalog ring bearings | Ball bearings | Roller bearings | Large output bearing | 47 |
-| **1 – Integrated ring ridges** | Printed case ridges | Ball bearings | Roller bearings | Large output bearing | 15 |
-| **2 – Direct pin/cam contact** | Printed case ridges | Direct sliding cam | Smooth pins | Large output bearing | 1 |
-| **3 – Bearingless journals** | Printed case ridges | Direct sliding cam | Smooth pins | Printed plain journal | 0 |
+## Default commodity profile
 
-![OpenSCAD simplification renders](docs/images/simplification_levels_render.jpg)
+The `NEMA17 Commodity R15` preset uses 624ZZ ring rollers on 4 mm rod, 625ZZ output rollers on 5 mm rod, 6000ZZ eccentric bearings, and a 6814ZZ output-flange bearing.
 
-### Intended use of simplified versions
+## Exploded and manufacturing views
 
-Level 1 is the most practical compromise for a functional printed prototype. Levels 2 and 3 are primarily useful as kinematic demonstrators, educational models, or very light/low-speed prototypes. Direct printed sliding interfaces will have higher friction, wear, heat, backlash growth, and sensitivity to printer calibration.
+![Exploded view](docs/images/exploded_v1_8.png)
 
-## Profiles
+![Separated 3D layout](docs/images/layout_3d_v1_8.png)
 
-The configurator includes named starting profiles for:
+## Validation
 
-- NEMA 17 Light / Medium / Heavy
-- NEMA 23 Light / Medium / Heavy
-- NEMA 34 Light / Medium / Heavy
-- NEMA 17 Commodity 15:1
-- Parametric manual mode
+The v1.8 source was compiled locally across all 10 supplied presets and all four simplification modes: **40/40 combinations passed the current geometry assertions**.
 
-See [`PROFILE_GUIDE_v1_6.csv`](docs/data/PROFILE_GUIDE_v1_6.csv) for the preset ratios and default bearing selections.
-
-## OpenSCAD views
-
-The `part` selector can generate functional or manufacturing-oriented views, including:
-
-- assembled gearbox
-- exploded assembly
-- motion demo
-- separated 3D layout
-- 2D layout
-- input/eccentric stack
-- individual plates and cycloid discs
-- drilling/pocket templates
-
-The separated layout is useful for understanding what is purchased versus machined/printed. At the most simplified level it looks like this:
-
-![OpenSCAD separated 3D layout](docs/images/layout_3d_render.jpg)
-
-## CNC and manufacturing output
-
-The model includes console reporting for:
-
-- finished part thickness
-- suggested stock thickness
-- XY blank/envelope size
-- critical bores and hole patterns
-- bearing designations and dimensions
-- rod/pin diameters and cut lengths
-- hardware classification (`CATALOG`, `STANDARD_STOCK_CUT`, `STANDARD_FASTENER`, `FABRICATED`, `PRINTED_FEATURE`, etc.)
-
-Useful generated reference files are under [`docs/data`](docs/data/).
-
-The default full-hardware cut list is [`CUT_LIST_NEMA17_15_COMMODITY_FULL_HARDWARE_v1_6.csv`](docs/data/CUT_LIST_NEMA17_15_COMMODITY_FULL_HARDWARE_v1_6.csv).
-
-## 3D-print clearance controls
-
-Simplified variants expose adjustable clearances rather than assuming one printer/process:
-
-- `print_radial_clearance`
-- `print_axial_clearance`
-- `printed_ring_bridge_width`
-- `plain_output_journal_t`
-- `motor_pilot_pocket_depth`
-
-The default radial clearance is a starting point for ordinary FDM, not a universal fit. Resin, SLS, machined polymer, material choice, lubrication, printer calibration, and part orientation can all justify different values.
-
-## Validation status
-
-For v1.6, the 10 named profiles were compiled across all four simplification levels. **40/40 profile × simplification combinations pass the current geometric assertions.** The motion demo also compiles at all four simplification levels for the default commodity profile.
-
-Passing these assertions means the model clears its current geometry/interference checks. It is **not a certified load rating**. Before using the gearbox for a structural or safety-critical application, bearing loads, output-pin loads, contact stresses, thermal behavior, lubrication, fatigue, and the actual motor shaft/pilot dimensions should be validated for the application.
-
-## Repository layout
-
-```text
-.
-├── README.md
-├── src/
-│   └── cnc_nema_cycloidal_gearbox_pancake_v1_6.scad
-└── docs/
-    ├── RELEASE_NOTES_v1_6.md
-    ├── data/
-    │   ├── PROFILE_GUIDE_v1_6.csv
-    │   ├── SIMPLIFICATION_GUIDE_v1_6.csv
-    │   ├── STANDARD_PART_LIBRARY_v1_6.csv
-    │   ├── HARDWARE_BOM_...csv
-    │   ├── CUT_LIST_...csv
-    │   └── profile_simplification_validation_v1_6.csv
-    └── images/
-        └── rendered design previews
-```
-
-## Getting started
-
-1. Install OpenSCAD.
-2. Open [`src/cnc_nema_cycloidal_gearbox_pancake_v1_6.scad`](src/cnc_nema_cycloidal_gearbox_pancake_v1_6.scad).
-3. Open the **Customizer** panel.
-4. Choose a profile, ratio, torque class, ring-roller system, and simplification level.
-5. Choose a `part` view.
-6. Use the spec-output selector for manufacturing/BOM information in the OpenSCAD console.
-7. Export the relevant 2D profiles or 3D geometry for your workflow.
-
-## Design philosophy
-
-The goal is not a single fixed gearbox. It is a common parametric model that can span:
-
-- CNC-machined aluminum reducers with real bearings and hardened pins
-- commodity-hardware prototypes
-- progressively simplified 3D-printed demonstrators
-
-while keeping the same underlying cycloidal geometry and making the hardware assumptions visible in the generated output.
-
-## Versioning
-
-This repository uses design-versioned source and generated files. The current source is **v1.6**; later revisions should retain prior releases/tags rather than silently replacing geometry.
+These checks are geometric only. They are not torque, fatigue, thermal, bearing-life, or safety ratings.
 
 ## Project status
 
-**Prototype / engineering development.** The model has geometric validation and prescribed kinematic animation, but it has not yet been assigned verified torque, life, efficiency, or safety ratings.
+**Prototype / engineering development.** Before structural or safety-critical use, validate contact stress, output-pin loading, bearing life, fits, lubrication, fatigue, thermal behavior, fastener preload, and the actual motor shaft/pilot dimensions for the application.
