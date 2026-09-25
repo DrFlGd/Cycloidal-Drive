@@ -2,13 +2,45 @@
 
 A configurable **OpenSCAD cycloidal reducer** for NEMA stepper motors, with CNC-oriented bearing-supported builds and progressively simplified 3D-printable variants.
 
-**Current design version: v1.8**
+**Current design version: v1.9**
 
 ## Assembly
 
 ![OpenSCAD assembly render](docs/images/assembly_v1_8.png)
 
 The output carrier is the external face flange, giving a short pancake package without a long projecting output shaft.
+
+## Machined coupled input shaft — v1.9
+
+v1.9 adds a second input architecture for motors whose stock shaft is too short or inconvenient for the full eccentric stack.
+
+`input_shaft_mode` now offers:
+
+- `Direct motor shaft` — preserves the original compact architecture.
+- `Machined coupled shaft` — uses a stepped fabricated shaft with a female socket over the existing motor shaft.
+
+The coupled shaft keeps a configurable gearbox-side drive diameter for the existing eccentric sleeves, while a larger rear hub provides the motor-shaft socket and radial locking screws. A registered NEMA spacer moves the gearbox away from the motor by the required amount.
+
+The spacer includes a **motor-side pilot pocket** and a **gearbox-side locating boss**, so the offset does not rely only on the four mounting screws for concentric alignment.
+
+For the default NEMA17 commodity values, the coupled-input starting point is:
+
+| Parameter | Default |
+| --- | ---: |
+| Motor shaft | 5 mm × 20 mm protrusion |
+| Gearbox drive shaft | 5 mm |
+| Coupling hub OD | 12 mm |
+| Female socket | 5.05 mm × 10 mm deep |
+| Locking | 2 × M3 radial set screws |
+| Motor offset | 22.5 mm |
+| Socket engagement | 9.5 mm |
+| Blind-end clearance | 0.5 mm |
+
+The relevant dimensions are all exposed in the Customizer: motor shaft protrusion and pilot height, drive-shaft diameter, hub OD, socket depth/clearance, minimum engagement, motor offset, locating-boss height, and set-screw size/count. The named NEMA presets populate starting values for these controls, and the values remain editable after loading a preset.
+
+The `part` selector also includes `motor_standoff_plate`, `motor_standoff_pilot_pocket_template`, and `coupled_input_shaft`.
+
+See [`INPUT_SHAFT_OPTIONS_v1_9.csv`](docs/data/INPUT_SHAFT_OPTIONS_v1_9.csv) and [`PROFILE_GUIDE_v1_9.csv`](docs/data/PROFILE_GUIDE_v1_9.csv).
 
 ## What changed in v1.8
 

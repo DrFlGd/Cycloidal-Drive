@@ -1,0 +1,3 @@
+option,description,motor_offset,notes
+Direct motor shaft,Motor shaft passes directly through eccentric sleeves,0 mm,Shortest package; motor shaft must reach full eccentric stack
+Machined coupled shaft,Stepped fabricated shaft with female socket over motor shaft,Editable / preset-populated,Adds registered spacer; socket depth engagement hub OD set screws and shaft diameter are configurable
