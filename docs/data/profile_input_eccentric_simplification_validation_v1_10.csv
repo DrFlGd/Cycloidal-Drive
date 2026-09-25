@@ -1,0 +1,121 @@
+preset,simplification_level,input_shaft_mode,coupled_eccentric_mode,status
+NEMA17 Commodity R15,Full hardware,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA17 Commodity R15,Full hardware,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA17 Commodity R15,Full hardware,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA17 Commodity R15,Integrated case lobes,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA17 Commodity R15,Integrated case lobes,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA17 Commodity R15,Integrated case lobes,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA17 Commodity R15,Direct pin and cam contact,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA17 Commodity R15,Direct pin and cam contact,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA17 Commodity R15,Direct pin and cam contact,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA17 Commodity R15,Bearingless printed journals,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA17 Commodity R15,Bearingless printed journals,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA17 Commodity R15,Bearingless printed journals,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA17 Light R11,Full hardware,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA17 Light R11,Full hardware,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA17 Light R11,Full hardware,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA17 Light R11,Integrated case lobes,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA17 Light R11,Integrated case lobes,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA17 Light R11,Integrated case lobes,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA17 Light R11,Direct pin and cam contact,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA17 Light R11,Direct pin and cam contact,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA17 Light R11,Direct pin and cam contact,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA17 Light R11,Bearingless printed journals,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA17 Light R11,Bearingless printed journals,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA17 Light R11,Bearingless printed journals,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA17 Medium R21,Full hardware,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA17 Medium R21,Full hardware,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA17 Medium R21,Full hardware,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA17 Medium R21,Integrated case lobes,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA17 Medium R21,Integrated case lobes,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA17 Medium R21,Integrated case lobes,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA17 Medium R21,Direct pin and cam contact,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA17 Medium R21,Direct pin and cam contact,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA17 Medium R21,Direct pin and cam contact,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA17 Medium R21,Bearingless printed journals,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA17 Medium R21,Bearingless printed journals,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA17 Medium R21,Bearingless printed journals,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA17 Heavy R29,Full hardware,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA17 Heavy R29,Full hardware,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA17 Heavy R29,Full hardware,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA17 Heavy R29,Integrated case lobes,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA17 Heavy R29,Integrated case lobes,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA17 Heavy R29,Integrated case lobes,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA17 Heavy R29,Direct pin and cam contact,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA17 Heavy R29,Direct pin and cam contact,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA17 Heavy R29,Direct pin and cam contact,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA17 Heavy R29,Bearingless printed journals,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA17 Heavy R29,Bearingless printed journals,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA17 Heavy R29,Bearingless printed journals,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA23 Light R11,Full hardware,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA23 Light R11,Full hardware,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA23 Light R11,Full hardware,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA23 Light R11,Integrated case lobes,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA23 Light R11,Integrated case lobes,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA23 Light R11,Integrated case lobes,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA23 Light R11,Direct pin and cam contact,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA23 Light R11,Direct pin and cam contact,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA23 Light R11,Direct pin and cam contact,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA23 Light R11,Bearingless printed journals,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA23 Light R11,Bearingless printed journals,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA23 Light R11,Bearingless printed journals,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA23 Medium R18,Full hardware,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA23 Medium R18,Full hardware,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA23 Medium R18,Full hardware,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA23 Medium R18,Integrated case lobes,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA23 Medium R18,Integrated case lobes,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA23 Medium R18,Integrated case lobes,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA23 Medium R18,Direct pin and cam contact,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA23 Medium R18,Direct pin and cam contact,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA23 Medium R18,Direct pin and cam contact,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA23 Medium R18,Bearingless printed journals,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA23 Medium R18,Bearingless printed journals,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA23 Medium R18,Bearingless printed journals,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA23 Heavy R29,Full hardware,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA23 Heavy R29,Full hardware,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA23 Heavy R29,Full hardware,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA23 Heavy R29,Integrated case lobes,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA23 Heavy R29,Integrated case lobes,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA23 Heavy R29,Integrated case lobes,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA23 Heavy R29,Direct pin and cam contact,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA23 Heavy R29,Direct pin and cam contact,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA23 Heavy R29,Direct pin and cam contact,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA23 Heavy R29,Bearingless printed journals,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA23 Heavy R29,Bearingless printed journals,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA23 Heavy R29,Bearingless printed journals,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA34 Light R11,Full hardware,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA34 Light R11,Full hardware,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA34 Light R11,Full hardware,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA34 Light R11,Integrated case lobes,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA34 Light R11,Integrated case lobes,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA34 Light R11,Integrated case lobes,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA34 Light R11,Direct pin and cam contact,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA34 Light R11,Direct pin and cam contact,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA34 Light R11,Direct pin and cam contact,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA34 Light R11,Bearingless printed journals,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA34 Light R11,Bearingless printed journals,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA34 Light R11,Bearingless printed journals,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA34 Medium R21,Full hardware,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA34 Medium R21,Full hardware,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA34 Medium R21,Full hardware,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA34 Medium R21,Integrated case lobes,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA34 Medium R21,Integrated case lobes,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA34 Medium R21,Integrated case lobes,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA34 Medium R21,Direct pin and cam contact,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA34 Medium R21,Direct pin and cam contact,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA34 Medium R21,Direct pin and cam contact,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA34 Medium R21,Bearingless printed journals,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA34 Medium R21,Bearingless printed journals,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA34 Medium R21,Bearingless printed journals,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA34 Heavy R29,Full hardware,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA34 Heavy R29,Full hardware,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA34 Heavy R29,Full hardware,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA34 Heavy R29,Integrated case lobes,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA34 Heavy R29,Integrated case lobes,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA34 Heavy R29,Integrated case lobes,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA34 Heavy R29,Direct pin and cam contact,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA34 Heavy R29,Direct pin and cam contact,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA34 Heavy R29,Direct pin and cam contact,Machined coupled shaft,Integrated double eccentric,PASS
+NEMA34 Heavy R29,Bearingless printed journals,Direct motor shaft,Separate eccentric sleeves,PASS
+NEMA34 Heavy R29,Bearingless printed journals,Machined coupled shaft,Separate eccentric sleeves,PASS
+NEMA34 Heavy R29,Bearingless printed journals,Machined coupled shaft,Integrated double eccentric,PASS
