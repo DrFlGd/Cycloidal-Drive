@@ -2,13 +2,40 @@
 
 A configurable **OpenSCAD cycloidal reducer** for NEMA stepper motors, with CNC-oriented bearing-supported builds and progressively simplified 3D-printable variants.
 
-**Current design version: v1.10**
+**Current design version: v1.11** (file `src/cnc_nema_cycloidal_gearbox_pancake_v1_10.scad` until the v1.11 restructure lands)
 
 ## Assembly
 
 ![OpenSCAD assembly render](docs/images/assembly_v1_8.png)
 
 The output carrier is the external face flange, giving a short pancake package without a long projecting output shaft.
+
+## What changed in v1.11
+
+v1.11 is a correctness and manufacturability release driven by a full review of the v1.10 script. No new architecture; the fixes below apply to every preset.
+
+### Geometry
+
+- **Odd lobe count is now asserted.** The second cycloid disc is the first disc turned 180°, which only meshes with the ring when the lobe count is odd. Even ratios (the old `NEMA23 Medium R18` preset, or any even custom ratio) put the second disc's lobes on top of the ring rollers by up to 3 mm. The preset is now `NEMA23 Medium R19` and the ratio dropdown offers 11, 13, 15, 17, 19, 21, 25, 29.
+- **Cycloid profile is resampled by curvature-weighted arc length.** The old uniform-parameter sampling left facet errors up to 0.36 mm in the valleys of the large presets, on the material side of the roller contact. The 1200-point profile now has a uniform facet error that the build report echoes (0.0005 to 0.004 mm across the presets).
+- **Undercut, ring-packing growth, direct-shaft length and tie-bolt wall are asserted.** Several presets previously had their ring pitch circle silently pushed outward by the roller packing rule (up to 32 mm), and tie bolts that broke into the cycloid cavity wall. All presets were re-derived so the stored values are the values the model uses.
+
+### Fits and simplified builds
+
+- Simplification levels 1 to 3 are treated as printed builds: the cycloid-to-lobe flank clearance, every bearing pocket (`print_bearing_pocket_clearance`) and the motor pilot bore use print clearances instead of machined press fits.
+- The direct-contact cam of levels 2 and 3 has its own diameter (`direct_cam_od_setting`, 20 to 32 mm by frame) instead of inheriting the omitted bearing's 10 to 30 mm bore.
+- Printed case lobes are filleted into the wall (`printed_lobe_root_fillet`), so the level 1 case can also be milled; an optional end chamfer is available for 3D solids.
+- The manufacturing report prints ISO-style fit hints beside every numeric bore.
+
+### Eccentric input
+
+- The default direct-shaft input now uses a **one-piece double-eccentric sleeve with a D-flat bore** (`eccentric_sleeve_style`, `eccentric_bore_style`). The two old sleeves were exactly as long as their bearings, so the set screw the BOM called for had nowhere to go. The one-piece sleeve fixes the 180° phase by machining, takes torque from the motor shaft flat and is captured axially by the rear and front plates. A round bore with a forward set-screw collar remains selectable, as do two separate (mirror-image, D-bore) sleeves.
+- The rear keeper plate is chosen automatically when blind axle pockets would leave under 2 mm of plate floor.
+
+### Export
+
+- `export_mode = "3D solid"` exports any part as a solid with its blind pockets, pilot steps and tapped-hole pilots for STL. `2D profile` (default) keeps the DXF outlines and separate drill templates. Blind pockets are now cut from the same 2D drill templates that are exported.
+- `tools/validate_presets.py` compiles every preset across all simplification levels and input architectures and writes a CSV.
 
 ## What changed in v1.10
 
@@ -87,7 +114,7 @@ Use the **Preset** drop-down in OpenSCAD's Customizer. The supplied sets are:
 - NEMA17 Medium R21
 - NEMA17 Heavy R29
 - NEMA23 Light R11
-- NEMA23 Medium R18
+- NEMA23 Medium R19
 - NEMA23 Heavy R29
 - NEMA34 Light R11
 - NEMA34 Medium R21
@@ -139,13 +166,17 @@ When integrated mode is selected, eccentric_A and eccentric_B report quantity ze
 
 ## Validation
 
-v1.10 was compiled across all **10 named presets × 4 simplification levels × 3 input/eccentric architectures**:
+Run `python3 tools/validate_presets.py --csv out.csv` (needs `openscad` on the PATH). It compiles all **10 named presets × 4 simplification levels × 3 input/eccentric architectures**:
 
 - direct motor shaft + separate eccentric sleeves,
 - coupled shaft + separate eccentric sleeves,
 - coupled shaft + integrated double eccentric.
 
-**120/120 combinations pass the current OpenSCAD geometry assertions.** See [profile_input_eccentric_simplification_validation_v1_10.csv](docs/data/profile_input_eccentric_simplification_validation_v1_10.csv).
+**v1.11: 116/116 applicable combinations pass the OpenSCAD geometry assertions.** The 4 remaining combinations force the direct motor shaft onto `NEMA23 Heavy R29`, whose stack needs 24.5 mm of shaft on a motor that has 21 mm; that preset specifies the machined coupled shaft for exactly this reason and the script reports those as not applicable. See [profile_input_eccentric_simplification_validation_v1_11.csv](docs/data/profile_input_eccentric_simplification_validation_v1_11.csv).
+
+Note on OpenSCAD's command line: values in a `-p/-P` parameter set override `-D` definitions for any key the set contains, regardless of argument order. The validation script therefore writes one derived parameter set per combination instead of mixing `-P` with `-D`.
+
+OpenSCAD 2021.01 renders every 2D export and the preview in under a second, but 3D solids go through CGAL: a pocketed plate takes about 10 s and the full assembly several minutes. OpenSCAD 2023 or later with the Manifold backend renders the same solids in seconds.
 
 These checks are geometric and assembly-clearance checks only. They are not torque, fatigue, thermal, bearing-life, shaft-coupling, journal-surface, or safety ratings. The one-piece eccentric shaft requires appropriate material, bearing-journal tolerance and surface finish, and a machining method capable of holding both eccentricity and 180° phase.
 
