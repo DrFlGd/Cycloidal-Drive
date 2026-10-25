@@ -1,0 +1,11 @@
+profile,motor_frame,ratio,torque_class,ring_bearing,ring_pitch_r_mm,eccentricity_mm,eccentric_bearing,output_roller,flange_bearing,housing_od_mm,input_shaft_mode,motor_shaft_protrusion_mm,direct_cam_od_mm,eccentric_sleeve,locking_thread
+NEMA17 Commodity R15,NEMA17,15,Medium,624ZZ,44.5,1,6000ZZ,625ZZ,6814ZZ,120.0,Direct motor shaft,22.0,20.0,One-piece double eccentric / D-flat,M3
+NEMA17 Light R11,NEMA17,11,Light,685VV,42.5,0.8,61801,624,61813,112.0,Direct motor shaft,22.0,20.0,One-piece double eccentric / D-flat,M3
+NEMA17 Medium R21,NEMA17,21,Medium,686AVV,47.5,1,61901,605,61813,126.0,Direct motor shaft,22.0,20.0,One-piece double eccentric / D-flat,M3
+NEMA17 Heavy R29,NEMA17,29,Heavy,686AVV,65,1.2,61902,626,61821,163.0,Direct motor shaft,22.0,20.0,One-piece double eccentric / D-flat,M3
+NEMA23 Light R11,NEMA23,11,Light,686AVV,51.5,1.1,61901,626,61816,134.0,Direct motor shaft,21.0,24.0,One-piece double eccentric / D-flat,M4
+NEMA23 Medium R19,NEMA23,19,Medium,688AVV,55,1.5,61902,608,61818,146.0,Direct motor shaft,21.0,24.0,One-piece double eccentric / D-flat,M4
+NEMA23 Heavy R29,NEMA23,29,Heavy,688AVV,79,1.8,61903,6000,61824,196.0,Machined coupled shaft,21.0,24.0,One-piece double eccentric / D-flat,M4
+NEMA34 Light R11,NEMA34,11,Light,688AVV,71,1.5,61805,608,61822,178.0,Direct motor shaft,32.0,32.0,One-piece double eccentric / D-flat,M5
+NEMA34 Medium R21,NEMA34,21,Medium,6800VV,74.5,2,61805,6000,61824,190.0,Direct motor shaft,32.0,32.0,One-piece double eccentric / D-flat,M5
+NEMA34 Heavy R29,NEMA34,29,Heavy,6800VV,94,2.0,61806,6001,61828,233.0,Direct motor shaft,32.0,32.0,One-piece double eccentric / D-flat,M5
