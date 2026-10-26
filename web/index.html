@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cycloidal Drive Generator</title>
+  <meta name="description" content="Configure, check and export the parametric pancake cycloidal gearbox in the browser.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='none' stroke='%232f6fdb' stroke-width='3'/%3E%3Ccircle cx='17.5' cy='16' r='4' fill='%232f6fdb'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/app.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="17.5" cy="16" r="4" fill="currentColor"/></svg>
+      <div>
+        <h1>Cycloidal Drive Generator</h1>
+        <p class="sub">Pancake gearbox for NEMA motors · design <span id="design-version">…</span></p>
+      </div>
+    </div>
+    <nav class="mobile-tabs" aria-label="Panels">
+      <button data-pane="config" class="active">1 Configure</button>
+      <button data-pane="preview">2 Preview</button>
+      <button data-pane="results">3 Check &amp; export</button>
+    </nav>
+    <div class="top-actions">
+      <span id="engine-status" class="pill">Starting…</span>
+      <button id="btn-help" class="ghost" aria-haspopup="dialog">How it works</button>
+    </div>
+  </header>
+
+  <main class="app">
+    <!-- 1 CONFIGURE -->
+    <section class="pane pane-config active" id="pane-config" aria-labelledby="h-config">
+      <div class="pane-head">
+        <span class="step">1</span>
+        <div>
+          <h2 id="h-config">Configure</h2>
+          <p>Start from a preset, then change what you need.</p>
+        </div>
+      </div>
+
+      <div class="preset-box">
+        <label for="preset-select" class="small-label">Preset</label>
+        <div class="preset-row">
+          <select id="preset-select"></select>
+          <button id="btn-reset-all" class="ghost" title="Discard all changes and go back to the preset">Reset</button>
+        </div>
+        <div class="preset-meta">
+          <span id="modified-count" class="muted">No changes from preset</span>
+          <span class="spacer"></span>
+          <div class="menu">
+            <button id="btn-file-menu" class="ghost small" aria-haspopup="menu" aria-expanded="false">Save / load ▾</button>
+            <div class="menu-list" role="menu" hidden>
+              <button role="menuitem" id="act-save-json">Save parameter set (.json)</button>
+              <button role="menuitem" id="act-load-json">Load parameter set…</button>
+              <button role="menuitem" id="act-copy-link">Copy link to this design</button>
+              <button role="menuitem" id="act-download-scad">Download OpenSCAD project (.zip)</button>
+            </div>
+          </div>
+          <input type="file" id="file-load" accept=".json,application/json" hidden>
+        </div>
+        <label for="profile-name" class="small-label">Design name</label>
+        <input id="profile-name" type="text" spellcheck="false">
+      </div>
+
+      <div class="config-tools">
+        <input id="param-search" type="search" placeholder="Find a setting…" aria-label="Find a setting">
+        <label class="switch"><input type="checkbox" id="show-advanced"><span></span>Advanced</label>
+      </div>
+      <div id="sections" class="sections"></div>
+    </section>
+
+    <!-- 2 PREVIEW -->
+    <section class="pane pane-preview" id="pane-preview" aria-labelledby="h-preview">
+      <div class="pane-head">
+        <span class="step">2</span>
+        <div>
+          <h2 id="h-preview">Preview</h2>
+          <p>Rendered by OpenSCAD in your browser.</p>
+        </div>
+        <span class="spacer"></span>
+        <label class="switch" title="Re-render the preview after every change"><input type="checkbox" id="auto-preview" checked><span></span>Auto update</label>
+        <button id="btn-render" class="primary">Update preview</button>
+      </div>
+
+      <div class="viewbar">
+        <div class="segmented" id="view-tabs" role="tablist" aria-label="View"></div>
+        <select id="part-select" aria-label="Show a single part"></select>
+        <div class="segmented small" id="dim-toggle" hidden>
+          <button data-dim="3d" class="active">3D solid</button>
+          <button data-dim="2d">2D profile</button>
+        </div>
+      </div>
+
+      <div class="viewer-wrap">
+        <div id="viewer3d" class="viewer"></div>
+        <div id="viewer2d" class="viewer viewer2d" hidden></div>
+        <div id="viewer-overlay" class="overlay" hidden>
+          <div class="spinner"></div>
+          <p id="overlay-text">Rendering…</p>
+          <button id="btn-cancel-render" class="ghost small">Cancel</button>
+        </div>
+        <div id="viewer-message" class="viewer-message" hidden></div>
+        <div class="viewer-tools" id="tools3d">
+          <button data-cam="iso" title="Isometric view">Iso</button>
+          <button data-cam="top" title="Look down the axis">Top</button>
+          <button data-cam="front" title="Front view">Front</button>
+          <button data-cam="side" title="Side view">Side</button>
+          <span class="sep"></span>
+          <label class="tool-check" title="Cut the model in half to see inside"><input type="checkbox" id="section-toggle"> Section</label>
+          <input type="range" id="section-pos" min="0.05" max="0.95" step="0.01" value="0.5" aria-label="Section position" disabled>
+        </div>
+      </div>
+
+      <div class="view-options">
+        <label class="switch"><input type="checkbox" id="opt-motor" checked><span></span>Motor</label>
+        <label class="switch"><input type="checkbox" id="opt-hardware" checked><span></span>Hardware</label>
+        <label class="inline" id="opt-gap-wrap" hidden>Gap <input type="number" id="opt-gap" min="4" max="30" step="2"> mm</label>
+        <label class="inline" id="opt-clear-wrap" hidden>Spacing <input type="number" id="opt-clear" min="10" max="80" step="5"> mm</label>
+        <label class="inline">Quality
+          <select id="opt-quality">
+            <option value="36">Draft</option>
+            <option value="72" selected>Normal</option>
+            <option value="full">Full (export)</option>
+          </select>
+        </label>
+        <span class="spacer"></span>
+        <span id="render-info" class="muted small"></span>
+        <div class="menu">
+          <button id="btn-view-download" class="ghost small" aria-haspopup="menu" aria-expanded="false">Download view ▾</button>
+          <div class="menu-list right" role="menu" hidden>
+            <button role="menuitem" id="act-view-stl">This view as STL</button>
+            <button role="menuitem" id="act-view-svg">This view as SVG (2D)</button>
+            <button role="menuitem" id="act-view-png">Screenshot (.png)</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 CHECK & EXPORT -->
+    <section class="pane pane-results" id="pane-results" aria-labelledby="h-results">
+      <div class="pane-head">
+        <span class="step">3</span>
+        <div>
+          <h2 id="h-results">Check &amp; export</h2>
+          <p>Design rules, manufacturing data and files.</p>
+        </div>
+      </div>
+
+      <div id="check-card" class="check-card pending">
+        <div class="check-icon" aria-hidden="true"></div>
+        <div class="check-body">
+          <strong id="check-title">Waiting for the first check…</strong>
+          <div id="check-detail"></div>
+        </div>
+      </div>
+      <div id="figures" class="figures"></div>
+
+      <div class="tabs" role="tablist" aria-label="Results">
+        <button role="tab" data-tab="export" class="active">Export</button>
+        <button role="tab" data-tab="report">Report</button>
+        <button role="tab" data-tab="parts">Parts</button>
+        <button role="tab" data-tab="bom">Hardware</button>
+        <button role="tab" data-tab="console">Console</button>
+      </div>
+
+      <div class="tab-panel" data-panel="export">
+        <p id="export-blocked" class="blocked" hidden>Exports are paused until every design rule passes.</p>
+        <div class="packs">
+          <button class="pack" id="pack-machining">
+            <strong>Machining pack</strong>
+            <span>DXF profiles and drill templates, STL lathe parts, specs</span>
+          </button>
+          <button class="pack" id="pack-printing">
+            <strong>3D printing pack</strong>
+            <span>STL solids of every part, specs</span>
+          </button>
+        </div>
+        <div class="export-quality">
+          <label class="inline">Curve segments ($fn) <input type="number" id="export-fn" min="16" max="512" step="8"></label>
+          <span class="muted small">Used for every exported file.</span>
+        </div>
+        <div id="export-progress" class="export-progress" hidden>
+          <div class="bar"><span></span></div>
+          <p id="export-progress-text"></p>
+          <button id="btn-cancel-export" class="ghost small">Cancel</button>
+        </div>
+        <div id="part-list" class="part-list"></div>
+        <div class="export-foot">
+          <button id="btn-export-selected" class="primary">Download selected (.zip)</button>
+          <label class="switch"><input type="checkbox" id="show-unused"><span></span>Show parts this design doesn't use</label>
+        </div>
+      </div>
+
+      <div class="tab-panel" data-panel="report" hidden>
+        <div class="panel-actions"><button id="btn-dl-report" class="ghost small">Download report (.txt)</button></div>
+        <table id="report-table" class="kv"></table>
+      </div>
+      <div class="tab-panel" data-panel="parts" hidden>
+        <div id="spec-list" class="spec-list"></div>
+      </div>
+      <div class="tab-panel" data-panel="bom" hidden>
+        <div class="panel-actions"><button id="btn-dl-bom" class="ghost small">Download BOM (.csv)</button></div>
+        <table id="bom-table" class="grid-table"></table>
+        <div id="omitted-list"></div>
+      </div>
+      <div class="tab-panel" data-panel="console" hidden>
+        <pre id="console-log" class="console"></pre>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="help-dialog">
+    <form method="dialog">
+      <h2>How the generator works</h2>
+      <ol>
+        <li><strong>Configure.</strong> Pick the preset closest to your motor and ratio, then change settings section by section. Settings that the current build does not use are hidden, and changed values are marked with a dot; the ↺ button returns one to the preset.</li>
+        <li><strong>Preview.</strong> The real OpenSCAD design is compiled in your browser. Pick the assembly, an exploded view or any single part. Section cuts the model in half.</li>
+        <li><strong>Check &amp; export.</strong> Every change runs the design's own rule checks. When they pass, download single parts, a machining pack (DXF) or a 3D printing pack (STL), plus the specs and hardware list.</li>
+      </ol>
+      <p>Saved parameter sets open in the desktop OpenSCAD Customizer as well. Nothing leaves your computer: rendering happens locally.</p>
+      <p class="muted small">This is a geometric and assembly-clearance design aid, not a load rating. Check bearing life, contact stress, fits and safe torque for your application.</p>
+      <div class="dialog-actions"><button class="primary" value="close">Got it</button></div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

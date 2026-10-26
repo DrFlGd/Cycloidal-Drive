@@ -8,7 +8,21 @@ A configurable **OpenSCAD cycloidal reducer** for NEMA 17 / 23 / 34 stepper moto
 
 The output carrier is the external face flange: a large 68-series bearing supports the rotating flange directly, so there is no projecting output shaft and no small-diameter bearing tower. The package stays short ("pancake").
 
-## Quick start
+## Web generator
+
+`web/` is a browser front end for the same design file: pick a preset, change settings grouped by function, see the assembly or any part rendered, read the design-rule check, and download DXF/SVG/STL files, a machining or 3D printing pack, the specs and the hardware BOM. The real `.scad` files run in the browser through OpenSCAD compiled to WebAssembly, so the page and the desktop Customizer always agree.
+
+![Web generator](docs/images/web_generator.png)
+
+Run it locally from the repository root and open <http://localhost:8000/web/>:
+
+```sh
+python3 -m http.server 8000
+```
+
+The page needs network access once to fetch the OpenSCAD engine (about 10 MB) and three.js from cdn.jsdelivr.net; rendering happens on your machine. Opening `web/index.html` straight from disk does not work, because the page loads the design files over HTTP. To publish it, enable GitHub Pages with **GitHub Actions** as the source and run the **Deploy web generator to GitHub Pages** workflow. See [web/README.md](web/README.md) for how the page is put together.
+
+## Quick start (desktop OpenSCAD)
 
 1. Install [OpenSCAD](https://openscad.org/). Version 2021.01 works; 2023 or later with the Manifold backend renders 3D solids in seconds instead of minutes.
 2. Open `src/cycloidal_gearbox.scad`. Keep the `.json` file beside it so the Customizer offers the presets.
@@ -102,10 +116,13 @@ View → Animate in OpenSCAD drives the input, orbits and counter-rotates the di
 | `src/lib/views.scad` | assembly, motion demo, exploded view, layouts |
 | `tools/validate_presets.py` | compiles every preset × level × input architecture |
 | `tools/render_docs.sh` | renders the images in this README |
+| `web/` | browser generator (see [web/README.md](web/README.md)) |
+| `tools/check_web_schema.py` | checks that every Customizer parameter has a place in the web form |
+| `tools/web_smoke_test.mjs` | opens the web generator in headless Chromium, checks, previews and exports |
 
 ## Validation
 
-`python3 tools/validate_presets.py --csv out.csv` compiles all **10 presets × 4 simplification levels × 3 input architectures** and records the housing size, facet error, undercut margin, minimum shaft length and the selected support bearings. **116/116 applicable combinations pass**; the 4 remaining ones force the direct motor shaft onto `NEMA23 Heavy R29`, which specifies the coupled shaft because its stack needs more shaft than the motor has. Results: [validation_matrix.csv](docs/data/validation_matrix.csv). The GitHub workflow runs the same matrix on every push and pull request and re-renders the images on `main`.
+`python3 tools/validate_presets.py --csv out.csv` compiles all **10 presets × 4 simplification levels × 3 input architectures** and records the housing size, facet error, undercut margin, minimum shaft length and the selected support bearings. **116/116 applicable combinations pass**; the 4 remaining ones force the direct motor shaft onto `NEMA23 Heavy R29`, which specifies the coupled shaft because its stack needs more shaft than the motor has. Results: [validation_matrix.csv](docs/data/validation_matrix.csv). The GitHub workflow runs the same matrix on every push and pull request, runs the web generator end to end in headless Chromium, and re-renders the images on `main`.
 
 These are geometric and assembly-clearance checks only. They are not torque, fatigue, thermal, bearing-life, shaft-coupling or safety ratings. The eccentric parts need appropriate material, bearing-journal tolerance and surface finish, and a machining method that holds both the eccentricity and the 180° phase.
 
