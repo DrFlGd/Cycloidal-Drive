@@ -28,8 +28,13 @@ render simplified_lobes_assembly -D 'part="assembly"' -D 'simplification_level="
 
 if command -v convert >/dev/null; then
     TMP="$(mktemp -d)"
-    xvfb-run -a openscad -q -o "$TMP/frame.png" --animate 24 --imgsize=800,640 --viewall --autocenter \
-        -p "$PARAMS" -P "$PRESET" -D 'part="motion_demo"' "$SCAD"
+    # One process per frame: OpenSCAD's --animate aborts with an X "BadRequest" error under
+    # the GitHub runner's Xvfb, while single-frame renders are fine.
+    FRAMES=24
+    for i in $(seq 0 $((FRAMES-1))); do
+        xvfb-run -a openscad -q -o "$(printf '%s/frame%03d.png' "$TMP" "$i")" --imgsize=800,640 --viewall --autocenter \
+            -p "$PARAMS" -P "$PRESET" -D 'part="motion_demo"' -D "\$t=$i/$FRAMES" "$SCAD"
+    done
     convert -delay 10 -loop 0 "$TMP"/frame*.png "$OUT/motion_demo.gif"
     rm -rf "$TMP"
     echo "rendered motion_demo.gif"
