@@ -1,5 +1,0 @@
-level,ring_contact,eccentric_support,output_pin_contact,output_support,notes
-Full hardware,Catalog bearings/sleeves,Ball bearings,Roller bearings,Large output bearing,Production-oriented reference
-Integrated case lobes,Case-rooted printed lobes,Ball bearings,Roller bearings,Large output bearing,Default simplified printed ring contact
-Direct pin and cam contact,Case-rooted printed lobes,Direct sliding cam,Smooth pins,Large output bearing,Prototype/low-duty
-Bearingless printed journals,Case-rooted printed lobes,Direct sliding cam,Smooth pins,Printed plain journal,Demonstrator/very light duty

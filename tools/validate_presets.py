@@ -21,7 +21,7 @@ MODES = [("Direct motor shaft", "Separate eccentric sleeves"),
 ECHO_KEYS = {
     "housing_od_mm": r'Housing OD: ([\d.]+) mm',
     "ring_pitch_r_mm": r'Ring pitch radius: ([\d.]+) mm',
-    "pitch_growth_mm": r'radial housing growth vs sleeve baseline: ([\d.]+) mm',
+    "pitch_growth_mm": r'packing growth over preset: ([\d.]+) mm',
     "output_face_od_mm": r'Output face OD: ([\d.]+) mm',
     "depth_mm": r'Overall gearbox depth from motor face to output face: ([\d.]+) mm',
     "facet_error_mm": r'est\. max facet error ([\d.e-]+) mm',
@@ -36,7 +36,7 @@ def main():
     ap = argparse.ArgumentParser()
     here = os.path.dirname(os.path.abspath(__file__))
     root = os.path.dirname(here)
-    ap.add_argument("--scad", default=os.path.join(root, "src", "cnc_nema_cycloidal_gearbox_pancake_v1_10.scad"))
+    ap.add_argument("--scad", default=os.path.join(root, "src", "cycloidal_gearbox.scad"))
     ap.add_argument("--json", default=None, help="preset file (default: same basename as --scad)")
     ap.add_argument("--csv", default=None, help="write results to this CSV")
     ap.add_argument("--levels", nargs="*", default=LEVELS)

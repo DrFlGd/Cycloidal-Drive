@@ -22,4 +22,4 @@ Input shaft support release. See the README section "What changed in v1.12" for 
 
 ## Views, export, tooling
 - Assembly, exploded, input_stack and layout_3d draw the new bearings; `output_hub_ring` 3D solid carries the pilot pocket; `motor_standoff_plate` 3D solid carries the rear bearing bore.
-- `tools/validate_presets.py` records the selected front and rear support bearings per combination; `docs/data/profile_input_eccentric_simplification_validation_v1_12.csv`.
+- `tools/validate_presets.py` records the selected front and rear support bearings per combination; the validation CSV (now `docs/data/validation_matrix.csv`).

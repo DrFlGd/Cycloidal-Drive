@@ -21,4 +21,4 @@ Correctness and manufacturability release. See the README section "What changed 
 ## Export and tooling
 - `export_mode` (2D profile / 3D solid) for every plate part; `eccentric_sleeve` part.
 - Blind pockets cut from the exported 2D drill templates (about half the CGAL time of per-hole cylinders).
-- `tools/validate_presets.py` and `docs/data/profile_input_eccentric_simplification_validation_v1_11.csv`.
+- `tools/validate_presets.py` and the validation CSV (now `docs/data/validation_matrix.csv`).
