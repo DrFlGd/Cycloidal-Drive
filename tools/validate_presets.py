@@ -27,6 +27,8 @@ ECHO_KEYS = {
     "facet_error_mm": r'est\. max facet error ([\d.e-]+) mm',
     "undercut_margin_mm": r'undercut margin ([\d.e-]+) mm',
     "min_shaft_mm": r'Minimum motor shaft protrusion: ([\d.]+) mm',
+    "front_support": r'Input front support: ([^"|]*?)\s*(?:\||")',
+    "rear_support": r'Input rear support: ([^"|]*?)\s*(?:\||")',
 }
 
 

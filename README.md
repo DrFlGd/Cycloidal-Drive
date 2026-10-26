@@ -2,13 +2,35 @@
 
 A configurable **OpenSCAD cycloidal reducer** for NEMA stepper motors, with CNC-oriented bearing-supported builds and progressively simplified 3D-printable variants.
 
-**Current design version: v1.11** (file `src/cnc_nema_cycloidal_gearbox_pancake_v1_10.scad` until the v1.11 restructure lands)
+**Current design version: v1.12** (file `src/cnc_nema_cycloidal_gearbox_pancake_v1_10.scad` until the restructure lands)
 
 ## Assembly
 
 ![OpenSCAD assembly render](docs/images/assembly_v1_8.png)
 
 The output carrier is the external face flange, giving a short pancake package without a long projecting output shaft.
+
+## What changed in v1.12
+
+v1.12 gives the eccentric input a bearing on the gearbox side. Up to v1.11 the one-piece sleeve or coupled shaft was cantilevered from the motor bearings, which then carried the full eccentric reaction load through the motor's own small bearings.
+
+### Front pilot bearing
+
+- The eccentric sleeve (direct shaft and coupled shaft with separate sleeves) or the integrated coupled shaft now continues forward into a **pilot bearing seated in the rear face of the output hub ring**, so the input is supported on both sides of the cycloid discs. The bearing is retained by the inner race retainer and the journal runs in the hollow output centre.
+- `input_front_support` (Auto / Pilot bearing / None) and `front_pilot_bearing_select` (Auto or a catalog size, 625ZZ to 6806VV, or Custom). Auto picks the largest bearing whose hub pocket clears the hub clamp screws, whose journal fits through the output centre bore, and that the front eccentric bearing can slide over during assembly (the pilot is concentric, the bearing sits at the eccentricity, so the journal must be at least twice the eccentricity smaller than the bearing bore). On the sleeve the journal also keeps 0.8 mm of wall around the motor shaft bore. The choice is echoed; the NEMA17 default is a 607ZZ on a 7 mm journal. At simplification levels 2 and 3 the pilot is a printed plain journal.
+- The motor shaft does **not** need to be longer: the sleeve journal extends beyond the shaft end and the minimum protrusion stays at the sleeve's drive bore.
+
+### Rear support bearing
+
+- For the machined coupled shaft with separate sleeves, `coupled_rear_support` seats a bearing on the coupling hub inside the registered motor spacer, inserted from the motor side against a shoulder behind the rear plate. `coupled_hub_od_setting` must equal the bearing bore; the NEMA23 and NEMA34 presets therefore use 17 and 25 mm hubs (6803VV / 6805VV) instead of 16 and 24 mm.
+- The integrated double-eccentric shaft is supported by the front pilot plus the motor bearings; a rear bearing is not possible there because the eccentric journals must pass through the rear plate.
+
+### Stack fix
+
+- The optional set-screw collar of the round-bore sleeve is now limited by the same assembly rule (bearing bore minus twice the eccentricity); with a 5 mm motor shaft that leaves a 7.5 mm collar, which is why the D-flat bore is the default.
+
+- The output hub ring was previously placed at the same axial position as the inner race retainer and overlapped it by the retainer thickness. The hub now sits in front of the retainer with a thickness equal to the output bearing width, so the inner race is clamped between the output face plate and the retainer through the hub as the drawings intended.
+- The manufacturing report and BOM list the pilot and rear support bearings, pocket diameters with fit hints, and the journal extents on the sleeve and coupled shaft.
 
 ## What changed in v1.11
 
@@ -81,7 +103,7 @@ The model asserts that the coupling hub is smaller than the rear bearing ID—or
 
 The named NEMA presets populate starting values for the integrated coupling hub. All values remain editable after loading the preset.
 
-See [INPUT_SHAFT_OPTIONS_v1_10.csv](docs/data/INPUT_SHAFT_OPTIONS_v1_10.csv), [PROFILE_GUIDE_v1_10.csv](docs/data/PROFILE_GUIDE_v1_10.csv), and [INTEGRATED_SHAFT_NOTES_v1_10.md](docs/data/INTEGRATED_SHAFT_NOTES_v1_10.md).
+See [INPUT_SHAFT_OPTIONS_v1_12.csv](docs/data/INPUT_SHAFT_OPTIONS_v1_12.csv), [PROFILE_GUIDE_v1_10.csv](docs/data/PROFILE_GUIDE_v1_10.csv), and [INTEGRATED_SHAFT_NOTES_v1_10.md](docs/data/INTEGRATED_SHAFT_NOTES_v1_10.md).
 
 ## Machined coupled input
 
@@ -172,7 +194,7 @@ Run `python3 tools/validate_presets.py --csv out.csv` (needs `openscad` on the P
 - coupled shaft + separate eccentric sleeves,
 - coupled shaft + integrated double eccentric.
 
-**v1.11: 116/116 applicable combinations pass the OpenSCAD geometry assertions.** The 4 remaining combinations force the direct motor shaft onto `NEMA23 Heavy R29`, whose stack needs 24.5 mm of shaft on a motor that has 21 mm; that preset specifies the machined coupled shaft for exactly this reason and the script reports those as not applicable. See [profile_input_eccentric_simplification_validation_v1_11.csv](docs/data/profile_input_eccentric_simplification_validation_v1_11.csv).
+**v1.12: 116/116 applicable combinations pass the OpenSCAD geometry assertions.** The 4 remaining combinations force the direct motor shaft onto `NEMA23 Heavy R29`, whose stack needs 24.5 mm of shaft on a motor that has 21 mm; that preset specifies the machined coupled shaft for exactly this reason and the script reports those as not applicable. See [profile_input_eccentric_simplification_validation_v1_12.csv](docs/data/profile_input_eccentric_simplification_validation_v1_12.csv) (the CSV also records which pilot and rear support bearings Auto selected for every combination).
 
 Note on OpenSCAD's command line: values in a `-p/-P` parameter set override `-D` definitions for any key the set contains, regardless of argument order. The validation script therefore writes one derived parameter set per combination instead of mixing `-P` with `-D`.
 

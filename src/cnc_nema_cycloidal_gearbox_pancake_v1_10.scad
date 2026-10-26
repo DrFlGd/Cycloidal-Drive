@@ -82,6 +82,13 @@
      under 2 mm of plate floor
    - printed-lobe roots are filleted; blind pockets are cut from the 2D drill templates
 
+ v1.12 adds input shaft support:
+   - front pilot: the one-piece sleeve or coupled shaft extends into a bearing seated in the
+     rear face of the output hub ring, so the eccentric is supported on both sides and the
+     motor bearings no longer carry its reaction load (plain printed journal at levels 2-3)
+   - rear support: a bearing on the coupled-shaft hub seated in the registered motor spacer
+   - the output hub ring now sits in front of the inner race retainer instead of overlapping it
+
  IMPORTANT ENGINEERING NOTE
  --------------------------
  Level 0 is the manufacturing-oriented bearing-supported reference design. Levels 1-3
@@ -236,6 +243,29 @@ motor_shaft_flat_depth = 0.5; // [0:0.05:3]
 eccentric_collar_length = 5.0; // [3:0.5:12]
 eccentric_set_screw_thread = "M3"; // [M3,M4,M5]
 
+/* [Input shaft support] */
+// Front pilot: the eccentric sleeve or coupled shaft extends forward into a bearing seated in
+// the rear face of the output hub ring, so the eccentric is supported on both sides and the
+// motor bearings carry no eccentric reaction load. Auto enables it whenever a forward journal
+// exists (one-piece sleeve or machined coupled shaft). At simplification levels 2-3 the pilot
+// is a printed plain journal. The journal occupies the hollow output centre.
+input_front_support = "Auto"; // [Auto,Pilot bearing,None]
+// Auto picks the largest journal/bearing whose hub pocket clears the clamp screws and
+// whose journal passes the output centre bore; the chosen size is echoed.
+front_pilot_bearing_select = "Auto"; // [Auto,625ZZ,626ZZ,607ZZ,688AVV,6800VV,6801VV,6802VV,6803VV,6804VV,6805VV,6806VV,Custom]
+custom_front_pilot_bearing_id = 10;
+custom_front_pilot_bearing_od = 19;
+custom_front_pilot_bearing_w = 5;
+front_pilot_journal_extra = 0.5; // [0:0.5:10]
+// Rear support (machined coupled shaft with separate sleeves only): a bearing on the
+// coupling hub seated in the motor spacer, inserted from the motor side against a shoulder
+// just behind the rear plate. coupled_hub_od_setting must equal the bearing bore.
+coupled_rear_support = "Auto"; // [Auto,Bearing in spacer,None]
+rear_support_bearing_select = "Auto"; // [Auto,6800VV,6801VV,6802VV,6803VV,6804VV,6805VV,6806VV,Custom]
+custom_rear_support_bearing_id = 12;
+custom_rear_support_bearing_od = 21;
+custom_rear_support_bearing_w = 5;
+
 /* [Editable preset geometry] */
 // These are populated by the Customizer presets and remain directly editable afterwards.
 ring_pitch_base_r_setting = 44.5; // [20:0.25:120]
@@ -349,6 +379,7 @@ function bearing_dims(code) =
     code=="624ZZ" ? [4,13,5] :
     code=="625ZZ" ? [5,16,5] :
     code=="626ZZ" ? [6,19,6] :
+    code=="607ZZ" ? [7,19,6] :
     code=="608ZZ" ? [8,22,7] :
     code=="6000ZZ" ? [10,26,8] :
     code=="6813ZZ" ? [65,85,10] :
@@ -361,6 +392,11 @@ function bearing_dims(code) =
     code=="688AVV"? [8,16,5] :
     code=="6800VV"? [10,19,5] :
     code=="6801VV"? [12,21,5] :
+    code=="6802VV"? [15,24,5] :
+    code=="6803VV"? [17,26,5] :
+    code=="6804VV"? [20,32,7] :
+    code=="6805VV"? [25,37,7] :
+    code=="6806VV"? [30,42,7] :
     code=="624"   ? [4,13,5] :
     code=="605"   ? [5,14,5] :
     code=="626"   ? [6,19,6] :
@@ -560,7 +596,10 @@ flange_bearing_pocket_d = flange_bearing_od + bearing_pocket_adjust;
 output_hub_od = flange_bearing_id + flange_hub_interference;
 output_support_t = use_flange_bearing ? flange_bearing_w : plain_output_journal_t;
 output_carrier_bore_d = use_flange_bearing ? flange_bearing_pocket_d : output_hub_od + 2*print_radial_clearance;
-output_hub_t = use_flange_bearing ? race_retainer_t + flange_bearing_w : race_retainer_t + output_support_t + 2*print_axial_clearance;
+// The hub ring sits in front of the inner race retainer (which clamps the bearing inner race
+// from behind through the hub) and spans exactly the output support: the bearing width, or
+// the plain journal length plus its axial clearances.
+output_hub_t = use_flange_bearing ? flange_bearing_w : output_support_t + 2*print_axial_clearance;
 input_plain_journal_bore_d = drive_shaft_d + 2*print_radial_clearance;
 active_motor_pilot_pocket_depth = min(motor_pilot_pocket_depth,max(0.6,rear_plate_t-1.0));
 
@@ -577,6 +616,33 @@ coupled_socket_engagement = max(0,min(coupled_socket_depth_setting,motor_shaft_e
 coupled_socket_bottom_clearance = coupled_socket_front_z-motor_shaft_end_z;
 coupled_recommended_motor_offset = motor_shaft_protrusion_setting + coupled_socket_front_wall + coupled_shaft_end_clearance;
 coupled_spacer_through_d = active_coupled_hub_od + 2*motor_spacer_radial_clearance;
+
+// ---- Input shaft support -------------------------------------------------------------
+front_journal_exists = use_double_sleeve || use_coupled_input_shaft;
+use_front_pilot = input_front_support=="Pilot bearing" ? true : input_front_support=="None" ? false : front_journal_exists;
+use_front_pilot_bearing = use_front_pilot && !simplify_level_2;
+function auto_pilot_code(n)= n==5?"625ZZ":n==6?"626ZZ":n==7?"607ZZ":n==8?"688AVV":n==10?"6800VV":n==12?"6801VV":n==15?"6802VV":n==17?"6803VV":n==20?"6804VV":n==25?"6805VV":n==30?"6806VV":"Custom";
+function metric_journal(d)= d>=30?30:d>=25?25:d>=20?20:d>=17?17:d>=15?15:d>=12?12:d>=10?10:d>=8?8:d>=7?7:d>=6?6:5;
+pilot_sizes=[30,25,20,17,15,12,10,8,7,6,5];
+// A sleeve pilot journal is bored through for the motor shaft and must keep a wall around it
+// (the motor shaft itself ends well before the pilot, so the wall only carries the bearing).
+sleeve_pilot_min_journal = use_double_sleeve ? ecc_drive_bore_d + 2*0.8 : 0;
+// Largest journal the front end can offer: the sleeve's own bearing journal size, or the
+// coupled shaft core turned to the nearest metric size.
+// The front eccentric bearing (or the disc bore at levels 2-3) is installed from the front over
+// the concentric pilot, so the pilot must be smaller than that bore by twice the eccentricity.
+front_passage_d = (use_eccentric_bearings ? ecc_bearing_id : cycloid_center_bore_d) - 2*eccentricity - 0.1;
+front_pilot_nominal_max = use_double_sleeve ? metric_journal(front_passage_d) : min(metric_journal(drive_shaft_d), metric_journal(front_passage_d));
+rear_support_possible = use_coupled_input_shaft && !use_integrated_eccentric_shaft;
+use_rear_support = coupled_rear_support=="Bearing in spacer" ? true : coupled_rear_support=="None" ? false : rear_support_possible;
+rear_support_code = rear_support_bearing_select=="Auto" ? auto_pilot_code(round(active_coupled_hub_od)) : rear_support_bearing_select;
+rear_support_id = rear_support_code=="Custom" ? custom_rear_support_bearing_id : bd(rear_support_code);
+rear_support_od = rear_support_code=="Custom" ? custom_rear_support_bearing_od : bD(rear_support_code);
+rear_support_w  = rear_support_code=="Custom" ? custom_rear_support_bearing_w  : bB(rear_support_code);
+rear_support_name = rear_support_code=="Custom" ? "CUSTOM" : rear_support_code;
+rear_support_pocket_d = rear_support_od + bearing_pocket_adjust;
+rear_support_shoulder_z = -1.0;                       // bearing front face, just behind the rear plate
+rear_support_z = rear_support_shoulder_z - rear_support_w;
 coupled_spacer_pilot_pocket_d = motor_pilot_d + 0.20;
 coupled_spacer_pilot_pocket_depth = min(motor_mount_offset,max(0,motor_pilot_height_setting+0.20));
 coupled_spacer_register_od = motor_pilot_d - 0.05;
@@ -595,6 +661,21 @@ output_mount_rot = 360/(2*output_mount_count);
 inner_retainer_screw_r = (output_center_bore_d/2 + (output_pin_circle_r-output_pin_d/2))/2;
 output_pin_press_depth = min(output_face_t-1.5,1.25*output_pin_d);
 
+// Front pilot bearing/journal: pocket in the rear face of the hub ring must clear the clamp
+// screws and the journal must pass the output centre bore of the retainer and face plate.
+front_pilot_pocket_limit_r = inner_retainer_screw_r - inner_retainer_clear_d/2 - 1.5;
+function pilot_pocket_d(n)= use_front_pilot_bearing ? bD(auto_pilot_code(n)) + bearing_pocket_adjust : n + eccentric_bearing_inner_interference + 2*print_radial_clearance;
+function pilot_fits(n)= n<=front_pilot_nominal_max && n + eccentric_bearing_inner_interference >= sleeve_pilot_min_journal && auto_pilot_code(n)!="Custom" && pilot_pocket_d(n)/2 < front_pilot_pocket_limit_r && n + 2.0 <= output_center_bore_d;
+function pick_pilot(i=0)= i>=len(pilot_sizes) ? 0 : pilot_fits(pilot_sizes[i]) ? pilot_sizes[i] : pick_pilot(i+1);
+front_pilot_nominal = front_pilot_bearing_select=="Auto" ? pick_pilot() : (front_pilot_bearing_select=="Custom" ? custom_front_pilot_bearing_id : bd(front_pilot_bearing_select));
+front_pilot_code = front_pilot_bearing_select=="Auto" ? auto_pilot_code(front_pilot_nominal) : front_pilot_bearing_select;
+front_pilot_id = front_pilot_code=="Custom" ? custom_front_pilot_bearing_id : bd(front_pilot_code);
+front_pilot_od = front_pilot_code=="Custom" ? custom_front_pilot_bearing_od : bD(front_pilot_code);
+front_pilot_w  = front_pilot_code=="Custom" ? custom_front_pilot_bearing_w  : bB(front_pilot_code);
+front_pilot_name = front_pilot_code=="Custom" ? "CUSTOM" : front_pilot_code;
+front_pilot_journal_d = (use_front_pilot_bearing ? front_pilot_id : front_pilot_nominal) + eccentric_bearing_inner_interference;
+front_pilot_pocket_d = use_front_pilot_bearing ? front_pilot_od + bearing_pocket_adjust : front_pilot_journal_d + 2*print_radial_clearance;
+
 // Only the output pins need to pass through the front ring-pin closure plate.
 front_center_clear_d = 2*(output_pin_circle_r + output_pin_d/2 + 2.0);
 
@@ -607,6 +688,12 @@ bearing_carrier_z = use_flange_bearing ? race_backer_z + race_retainer_t : race_
 bearing_front_z = bearing_carrier_z + output_support_t;
 output_face_z = use_flange_bearing ? bearing_front_z : bearing_front_z + print_axial_clearance;
 output_front_z = output_face_z + output_face_t;
+
+output_hub_z = race_backer_z + race_retainer_t;
+front_pilot_pocket_depth = use_front_pilot_bearing ? front_pilot_w : output_hub_t + 0.2;
+front_pilot_z = output_hub_z;
+front_pilot_front_z = front_pilot_z + (use_front_pilot_bearing ? front_pilot_w : output_hub_t);
+front_journal_end_z = use_front_pilot ? front_pilot_front_z + front_pilot_journal_extra : 0;
 
 disc1_z = rear_plate_t + rear_running_gap;
 disc2_z = disc1_z + disc_t + disc_gap;
@@ -624,13 +711,24 @@ output_pin_end_z = output_face_z + output_pin_press_depth;
 output_pin_length = output_pin_end_z-output_pin_start_z;
 sleeve_journal_end_z = disc2_z + ecc_cam_length;
 sleeve_collar_length = use_sleeve_collar ? eccentric_collar_length : 0;
-sleeve_front_z = sleeve_journal_end_z + sleeve_collar_length;
-sleeve_collar_od = ecc_bushing_od;
+sleeve_collar_end_z = sleeve_journal_end_z + sleeve_collar_length;
+// The one-piece sleeve carries the front pilot journal; two separate sleeves cannot.
+sleeve_front_z = (use_front_pilot && use_double_sleeve) ? max(sleeve_collar_end_z, front_journal_end_z) : sleeve_collar_end_z;
+// The collar is in front of the front eccentric journal and the front bearing/disc must pass
+// over it, so it is limited to the bearing bore minus twice the eccentricity.
+sleeve_collar_od = floor(2*(min(ecc_bushing_od, (use_eccentric_bearings ? ecc_bearing_id : cycloid_center_bore_d) - 2*eccentricity - 0.1)))/2;
 // D-flat: distance from shaft axis to the flat, with the slip clearance split on both sides.
 drive_flat_dist = drive_shaft_d/2 - motor_shaft_flat_depth + motor_shaft_slip/2;
 sleeve_set_screw_tap_d = eccentric_set_screw_thread=="M5" ? 4.2 : eccentric_set_screw_thread=="M4" ? 3.3 : 2.5;
-minimum_drive_shaft_from_rear_plate = use_separate_eccentric_sleeves ? sleeve_front_z : rear_plate_t + rear_running_gap + 2*ecc_cam_length + disc_gap;
-integrated_shaft_front_z = minimum_drive_shaft_from_rear_plate + integrated_front_extension;
+// Motor shaft only has to reach the end of the D-flat drive length (journals plus any
+// collar); a pilot journal beyond that is carried by the pilot bearing.
+minimum_drive_shaft_from_rear_plate = use_separate_eccentric_sleeves ? sleeve_collar_end_z : sleeve_journal_end_z;
+// Coupled shaft: the core runs to the pilot journal (or a short extension without pilot).
+// With a one-piece sleeve on the core, the sleeve carries the pilot and the core stops inside it.
+coupled_core_pilot = use_front_pilot && !use_double_sleeve;
+coupled_pilot_start_z = use_integrated_eccentric_shaft ? sleeve_journal_end_z : sleeve_collar_end_z;
+integrated_shaft_front_z = coupled_core_pilot ? coupled_pilot_start_z : (use_double_sleeve ? sleeve_front_z - 1.0 : minimum_drive_shaft_from_rear_plate + integrated_front_extension);
+coupled_shaft_front_z = coupled_core_pilot ? front_journal_end_z : integrated_shaft_front_z;
 minimum_motor_shaft_from_face = use_coupled_input_shaft ?
     (motor_mount_offset - coupled_socket_depth_setting - coupled_socket_front_wall + coupled_min_engagement) :
     minimum_drive_shaft_from_rear_plate;
@@ -655,6 +753,32 @@ assert(!use_separate_eccentric_sleeves || use_double_sleeve || use_d_flat_bore,
        "Two separate eccentric sleeves are fully covered by their bearings and have no room for a set screw. Choose eccentric_bore_style=D-flat or eccentric_sleeve_style=One-piece double eccentric.");
 assert(!use_d_flat_bore || motor_shaft_flat_depth > 0.2,
        "D-flat bore selected but motor_shaft_flat_depth is too small to carry torque; measure the motor shaft flat.");
+assert(!use_front_pilot || front_journal_exists,
+       "Front pilot bearing needs a forward journal: use the one-piece double eccentric sleeve or the machined coupled shaft (two separate sleeves end at their bearings).");
+assert(!use_front_pilot || front_pilot_nominal > 0,
+       str("No front pilot bearing fits: the hub pocket must stay inside the clamp-screw circle (limit radius ",front_pilot_pocket_limit_r," mm) and the journal must pass the output centre bore (",output_center_bore_d," mm). Enlarge output_center_bore_d_setting / output_pin_circle_r_setting, or set input_front_support=None."));
+assert(!use_front_pilot_bearing || front_pilot_w + 1.5 <= output_hub_t,
+       str("Front pilot bearing (",front_pilot_w," mm wide) does not fit in the ",output_hub_t," mm hub ring with a 1.5 mm shoulder; choose a thinner bearing."));
+assert(!use_front_pilot || front_pilot_journal_d + 1.0 < output_center_bore_d,
+       "Front pilot journal does not pass the output centre bore of the inner retainer and face plate.");
+assert(!use_front_pilot || front_pilot_journal_d >= sleeve_pilot_min_journal,
+       str("Front pilot journal (",front_pilot_journal_d," mm) leaves less than 0.8 mm of wall around the ",ecc_drive_bore_d," mm sleeve bore; choose a larger front_pilot_bearing_select."));
+assert(!use_front_pilot || front_pilot_journal_d <= front_passage_d,
+       str("Front pilot journal (",front_pilot_journal_d," mm) is too large: the front eccentric bearing/disc (bore ",front_passage_d+2*eccentricity+0.1," mm, offset ",eccentricity," mm) must slide over it during assembly, so the journal must be at most ",front_passage_d," mm. Choose a smaller front_pilot_bearing_select."));
+assert(!(use_sleeve_collar && use_front_pilot && use_double_sleeve) || sleeve_collar_end_z <= front_pilot_z - 0.5,
+       str("Set-screw collar (ends at z=",sleeve_collar_end_z,") runs into the front pilot bearing (z=",front_pilot_z,"); shorten eccentric_collar_length or use the D-flat bore."));
+assert(!use_rear_support || rear_support_possible,
+       "Rear support bearing in the spacer needs the machined coupled shaft with separate sleeves: the integrated shaft's hub must stay smaller than the rear eccentric bearing bore, so it cannot carry a bearing.");
+assert(!use_rear_support || (rear_support_code!="Custom" && rear_support_id>0 && abs(rear_support_id-active_coupled_hub_od)<0.05) || (rear_support_code=="Custom" && abs(rear_support_id-active_coupled_hub_od)<0.05),
+       str("coupled_hub_od_setting (",active_coupled_hub_od," mm) must equal the rear support bearing bore (10, 12, 15, 17, 20, 25 or 30 mm), or set coupled_rear_support=None."));
+assert(!use_rear_support || rear_support_pocket_d/2 + 1.5 < mount_spacing/2 - (mount_hole_d+0.4)/2,
+       "Rear support bearing pocket breaks into the motor mounting holes of the spacer.");
+assert(!use_rear_support || rear_support_w + 1.0 + coupled_spacer_pilot_pocket_depth < motor_mount_offset,
+       "Motor spacer is too thin for the rear support bearing pocket plus the motor pilot pocket.");
+assert(!use_rear_support || -rear_support_z <= coupled_hub_length - 0.5,
+       str("Coupling hub (",coupled_hub_length," mm long) does not reach the rear support bearing at z=",rear_support_z,"; deepen the socket or shorten the bearing."));
+assert(!use_sleeve_collar || (sleeve_collar_od - ecc_drive_bore_d)/2 >= 1.2,
+       str("Set-screw collar wall is only ",(sleeve_collar_od - ecc_drive_bore_d)/2," mm (collar OD ",sleeve_collar_od," mm is limited by the front bearing bore minus 2x eccentricity); use the D-flat bore instead."));
 assert(!use_sleeve_collar || sleeve_front_z <= front_pin_z || sleeve_collar_od + 2*print_radial_clearance < output_center_bore_d,
        str("Eccentric sleeve collar (OD ",sleeve_collar_od," mm) extends past the front plate and does not clear the output centre bore (",output_center_bore_d," mm). Shorten eccentric_collar_length, enlarge output_center_bore_d_setting or use the D-flat bore."));
 assert(!ecc_catalog || ecc_bearing_code=="Custom" || bd(ecc_bearing_code)>0, "Unknown eccentric bearing designation.");
@@ -745,6 +869,8 @@ if ($preview) {
     if(use_separate_eccentric_sleeves) echo(str("Eccentric sleeve: ",use_double_sleeve?"ONE-PIECE double eccentric":"two separate sleeves"," | bore ",use_d_flat_bore?str("D-flat, flat depth ",motor_shaft_flat_depth," mm, no set screw"):str("round + ",eccentric_collar_length," mm set-screw collar")," | journal OD ",ecc_bushing_od," mm"));
     echo(str("Output bolt pattern: ",output_mount_count,"x ",output_mount_thread," blind @ PCD ",2*output_mount_r," mm"));
     echo(str("Output center bore: ",output_center_bore_d," mm"));
+    echo(str("Input front support: ",use_front_pilot ? (use_front_pilot_bearing ? str(front_pilot_name," = ",front_pilot_id,"x",front_pilot_od,"x",front_pilot_w," mm in hub pocket ",front_pilot_pocket_d," mm | journal ",front_pilot_journal_d," mm to z=",front_journal_end_z) : str("PRINTED PLAIN JOURNAL ",front_pilot_journal_d," mm in hub bore ",front_pilot_pocket_d," mm")) : "NONE - motor bearings carry the eccentric load"));
+    if(use_coupled_input_shaft) echo(str("Input rear support: ",use_rear_support ? str(rear_support_name," = ",rear_support_id,"x",rear_support_od,"x",rear_support_w," mm in spacer pocket ",rear_support_pocket_d," mm at z=",rear_support_z) : "NONE"));
     echo(str("Rear ring contact/capture: ",use_integrated_ring_ridges ? "Integrated case ridges; no ring axles" : rear_capture_label));
     if(!use_integrated_ring_ridges) echo(str("Ring axle cut length: ",ring_axle_length," mm"));
     echo(str("Output pin cut length: ",output_pin_length," mm"));
@@ -825,7 +951,8 @@ module spec_output_hub(){env=output_hub_od;echo(str("SPEC|part=output_hub_ring|q
              "mm|thickness=",output_hub_t,"mm|common_inch_stock_t=",common_inch_stock_t(output_hub_t),
              use_flange_bearing ? str("mm|bearing_inner_fit_OD=",output_hub_od,"mm for nominal ID ",flange_bearing_id) : str("mm|plain_journal_OD=",output_hub_od,"mm running in carrier bore ",output_carrier_bore_d),
              "mm|center_bore=",output_center_bore_d,"mm|output_pin_slip_holes=",output_pin_count,"x",output_pin_hub_hole_d," @ PCD ",2*output_pin_circle_r,
-             "mm|clamp_screw_clearance=",inner_retainer_screw_count,"x",inner_retainer_clear_d," @ PCD ",2*inner_retainer_screw_r,"mm"));}
+             "mm|clamp_screw_clearance=",inner_retainer_screw_count,"x",inner_retainer_clear_d," @ PCD ",2*inner_retainer_screw_r,"mm",
+             use_front_pilot ? str("|REAR pilot pocket=",use_front_pilot_bearing ? str(fit_bearing_pocket(front_pilot_od,front_pilot_pocket_d)," depth ",front_pilot_pocket_depth,"mm for ",front_pilot_name) : str("plain journal bore ",front_pilot_pocket_d,"mm THROUGH")) : ""));}
 module spec_inner_retainer(){env=inner_race_retainer_od;echo(str("SPEC|part=inner_race_retainer|qty=1|material=7075-T6 or steel|finished_envelope=",env,"x",env,
              "mm|thickness=",race_retainer_t,"mm|common_inch_stock_t=",common_inch_stock_t(race_retainer_t),
              "mm|center_bore=",output_center_bore_d,"mm|output_pin_clearance=",output_pin_count,"x",output_pin_hub_hole_d+0.20," @ PCD ",2*output_pin_circle_r,
@@ -833,7 +960,7 @@ module spec_inner_retainer(){env=inner_race_retainer_od;echo(str("SPEC|part=inne
              "mm|NOTE=clamps bearing INNER race against output face plate through hub ring"));}
 module spec_ecc(which="A") {env=ecc_bushing_od;sgn=which=="A"?1:-1;echo(str("SPEC|part=eccentric_",which,"|qty=",(use_separate_eccentric_sleeves && !use_double_sleeve)?1:0,"|material=",simplify_level_2?"PRINTABLE POLYMER OR METAL":"4140/17-4 preferred","|OD=",env,
              "mm|length=",ecc_cam_length,"mm|drive_bore=",use_integrated_eccentric_shaft?"OMITTED - INTEGRAL JOURNAL":str(ecc_drive_bore_d,"mm",use_d_flat_bore?str(" D-flat at ",drive_flat_dist,"mm from axis (+Y)"):""),"|eccentric_offset=",sgn*eccentricity,"mm|support=",use_eccentric_bearings?str(ecc_bearing_name," ",ecc_bearing_id,"x",ecc_bearing_od,"x",ecc_bearing_w,"mm"):str("DIRECT IN CYCLOID BORE ",cycloid_center_bore_d,"mm"),"|",use_integrated_eccentric_shaft?"INTEGRATED INTO COUPLED SHAFT":use_double_sleeve?"REPLACED BY ONE-PIECE SLEEVE":"D-flat bore; A and B are mirror parts; axially captured by plates"));}
-module spec_eccentric_sleeve(){echo(str("SPEC|part=eccentric_sleeve|qty=",use_double_sleeve?1:0,"|material=",simplify_level_2?"PRINTABLE POLYMER OR METAL":"4140/17-4 preferred","|style=ONE-PIECE DOUBLE ECCENTRIC|journal_OD=",ecc_bushing_od,"mm x ",ecc_cam_length,"mm each|journal_offsets=+/-",eccentricity,"mm (180deg, fixed by machining)|journal_z_from_rear_face=",disc1_z,",",disc2_z,"mm|overall_length=",sleeve_front_z-disc1_z,"mm|drive_bore=",ecc_drive_bore_d,"mm ",use_d_flat_bore?str("D-flat at ",drive_flat_dist,"mm from axis, flat depth ",motor_shaft_flat_depth,"mm, no set screw, axially captured by plates"):str("round + collar OD ",sleeve_collar_od,"mm x ",eccentric_collar_length,"mm with 2x ",eccentric_set_screw_thread," radial set screws (tap drill ",sleeve_set_screw_tap_d,"mm)"),"|blank_OD>=",ecc_bushing_od+2*eccentricity,"mm|support=",use_eccentric_bearings?str("2x ",ecc_bearing_name):str("DIRECT IN CYCLOID BORES ",cycloid_center_bore_d,"mm")));}
+module spec_eccentric_sleeve(){echo(str("SPEC|part=eccentric_sleeve|qty=",use_double_sleeve?1:0,"|material=",simplify_level_2?"PRINTABLE POLYMER OR METAL":"4140/17-4 preferred","|style=ONE-PIECE DOUBLE ECCENTRIC|journal_OD=",ecc_bushing_od,"mm x ",ecc_cam_length,"mm each|journal_offsets=+/-",eccentricity,"mm (180deg, fixed by machining)|journal_z_from_rear_face=",disc1_z,",",disc2_z,"mm|overall_length=",sleeve_front_z-disc1_z,"mm",use_front_pilot?str("|front_pilot_journal=",front_pilot_journal_d,"mm from z=",max(sleeve_collar_end_z,sleeve_journal_end_z)," to ",front_journal_end_z,"mm for ",use_front_pilot_bearing?front_pilot_name:"printed plain journal"):"","|drive_bore=",ecc_drive_bore_d,"mm ",use_d_flat_bore?str("D-flat at ",drive_flat_dist,"mm from axis, flat depth ",motor_shaft_flat_depth,"mm, no set screw, axially captured by plates"):str("round + collar OD ",sleeve_collar_od,"mm x ",eccentric_collar_length,"mm with 2x ",eccentric_set_screw_thread," radial set screws (tap drill ",sleeve_set_screw_tap_d,"mm)"),"|blank_OD>=",ecc_bushing_od+2*eccentricity,"mm|support=",use_eccentric_bearings?str("2x ",ecc_bearing_name):str("DIRECT IN CYCLOID BORES ",cycloid_center_bore_d,"mm")));}
 module spec_templates(which){
     if(which=="rear_motor_pilot_pocket_template") echo(str("SPEC|operation=rear_motor_pilot_pocket_template|diameter=",motor_pilot_clear_d,"mm|depth=",active_motor_pilot_pocket_depth,"mm FROM MOTOR SIDE|only_required_at_simplification_level_3=",use_input_plain_journal));
     else if(which=="rear_pin_drill_template") echo(str("SPEC|operation=rear_pin_drill_template|",ring_count,"x ",rear_ring_axle_hole_d,"mm @ PCD ",2*ring_pitch_r,"mm|depth=",rear_axle_blind_depth,"mm from cavity side"));
@@ -843,10 +970,13 @@ module spec_templates(which){
              "mm|hub-clamp taps=",inner_retainer_screw_count,"x",inner_retainer_thread," tap drill ",inner_retainer_tap_d,"mm @ PCD ",2*inner_retainer_screw_r,"mm"));
 }
 module spec_motor_standoff(){
-    echo(str("SPEC|part=motor_standoff_plate|qty=",use_coupled_input_shaft?1:0,"|material=6061-T6 OR PRINTABLE POLYMER|outer=",frame_side,"x",frame_side,"mm|thickness=",motor_mount_offset,"mm|through_bore=",coupled_spacer_through_d,"mm|motor_side_pilot_pocket=",coupled_spacer_pilot_pocket_d,"mm x ",coupled_spacer_pilot_pocket_depth,"mm deep|gearbox_register_OD=",coupled_spacer_register_od,"mm|register_height=",motor_spacer_register_height,"mm|mount_holes=4x",mount_hole_d+0.4,"mm @ ",mount_spacing,"mm square"));
+    echo(str("SPEC|part=motor_standoff_plate|qty=",use_coupled_input_shaft?1:0,"|material=6061-T6 OR PRINTABLE POLYMER|outer=",frame_side,"x",frame_side,"mm|thickness=",motor_mount_offset,"mm|through_bore=",coupled_spacer_through_d,"mm",
+             use_rear_support ? str(" (shoulder ",-rear_support_shoulder_z,"mm behind gearbox face)|rear_support_bearing_bore=",fit_bearing_pocket(rear_support_od,rear_support_pocket_d)," from motor side to shoulder, for ",rear_support_name) : "",
+             "|motor_side_pilot_pocket=",coupled_spacer_pilot_pocket_d,"mm x ",coupled_spacer_pilot_pocket_depth,"mm deep|gearbox_register_OD=",coupled_spacer_register_od,"mm|register_height=",motor_spacer_register_height,"mm|mount_holes=4x",mount_hole_d+0.4,"mm @ ",mount_spacing,"mm square"));
 }
 module spec_coupled_input_shaft(){
-    echo(str("SPEC|part=coupled_input_shaft|qty=",use_coupled_input_shaft?1:0,"|style=",coupled_eccentric_mode,"|material=4140 prehard / 17-4 preferred|drive_d=",drive_shaft_d,"mm|hub_OD=",active_coupled_hub_od,"mm|hub_length=",coupled_hub_length,"mm|motor_socket=",coupled_socket_d,"mm x ",coupled_socket_depth_setting,"mm deep|socket_front_wall=",coupled_socket_front_wall,"mm|radial_locking=",coupled_set_screw_count,"x",coupled_set_screw_thread," tap drill ",coupled_set_screw_tap_d,"mm|forward_length_from_rear_face=",integrated_shaft_front_z,"mm",
+    echo(str("SPEC|part=coupled_input_shaft|qty=",use_coupled_input_shaft?1:0,"|style=",coupled_eccentric_mode,"|material=4140 prehard / 17-4 preferred|drive_d=",drive_shaft_d,"mm|hub_OD=",active_coupled_hub_od,"mm|hub_length=",coupled_hub_length,"mm|motor_socket=",coupled_socket_d,"mm x ",coupled_socket_depth_setting,"mm deep|socket_front_wall=",coupled_socket_front_wall,"mm|radial_locking=",coupled_set_screw_count,"x",coupled_set_screw_thread," tap drill ",coupled_set_screw_tap_d,"mm|forward_length_from_rear_face=",coupled_shaft_front_z,"mm",
+             coupled_core_pilot ? str("|front_pilot_journal=",front_pilot_journal_d,"mm from z=",coupled_pilot_start_z," to ",front_journal_end_z,"mm for ",use_front_pilot_bearing?front_pilot_name:"printed plain journal") : "",
              use_integrated_eccentric_shaft?str("|integrated_journals=2x OD ",ecc_bushing_od,"mm x ",ecc_cam_length,"mm|journal_offsets=+/-",eccentricity,"mm|journal_z=",disc1_z,",",disc2_z,"mm|blank_OD>=",integrated_shaft_blank_od,"mm|rear_assembly_passage=",integrated_rear_passage_d,"mm"):"|eccentric_journals=SEPARATE SLEEVES"));
 }
 module input_stack_specs(){
@@ -892,6 +1022,11 @@ module hardware_specs(){
     else echo(str("OMITTED_HARDWARE|role=output_roller_bearings|replaced_by=direct ",output_pin_d,"mm output pins in orbit holes ",output_orbit_hole_d,"mm"));
     if(use_flange_bearing) echo(str("HARDWARE|source_class=CATALOG|role=pancake_output_bearing|qty=1|designation=",flange_bearing_name,"|size=",flange_bearing_id,"x",flange_bearing_od,"x",flange_bearing_w,"mm"));
     else echo(str("OMITTED_HARDWARE|role=pancake_output_bearing|replaced_by=printed plain journal|hub_OD=",output_hub_od,"mm|carrier_bore=",output_carrier_bore_d,"mm|radial_clearance=",print_radial_clearance,"mm per side|axial_clearance=",print_axial_clearance,"mm per side"));
+    if(use_front_pilot_bearing) echo(str("HARDWARE|source_class=CATALOG|role=input_front_pilot_bearing|qty=1|designation=",front_pilot_name,"|size=",front_pilot_id,"x",front_pilot_od,"x",front_pilot_w,"mm|NOTE=seated in output hub rear pocket, retained by the inner race retainer; journal on the ",use_double_sleeve?"eccentric sleeve":"coupled shaft"));
+    else if(use_front_pilot) echo(str("OMITTED_HARDWARE|role=input_front_pilot_bearing|replaced_by=printed plain journal ",front_pilot_journal_d,"mm in hub bore ",front_pilot_pocket_d,"mm"));
+    else echo("OMITTED_HARDWARE|role=input_front_pilot_bearing|NOTE=no forward journal; motor bearings carry the eccentric reaction load");
+    if(use_rear_support) echo(str("HARDWARE|source_class=CATALOG|role=input_rear_support_bearing|qty=1|designation=",rear_support_name,"|size=",rear_support_id,"x",rear_support_od,"x",rear_support_w,"mm|NOTE=on the coupling hub, inserted into the spacer from the motor side against the shoulder; retain with a spacer tube or circlip on the motor side"));
+    else if(use_coupled_input_shaft && use_separate_eccentric_sleeves) echo("OMITTED_HARDWARE|role=input_rear_support_bearing|NOTE=coupled shaft runs on the motor bearings only");
     echo(str("HARDWARE|source_class=STANDARD_FASTENER|role=housing_tie_bolts|qty=",tie_count,"|clearance=",tie_clear_d,"mm|stack_grip~=",tie_grip,"mm|add nut/thread engagement"));
     echo(str("HARDWARE|source_class=STANDARD_FASTENER|role=output_hub_clamp_screws|qty=",inner_retainer_screw_count,"|thread=",inner_retainer_thread));
     echo(str("CATALOG_STATUS|input_shaft=",input_shaft_mode,"|eccentric_input=",use_integrated_eccentric_shaft?"INTEGRATED_DOUBLE_ECCENTRIC":"SEPARATE_ECCENTRIC_SLEEVES","|simplification=",simplification_level,"|eccentric=",use_eccentric_bearings?ecc_bearing_name:"OMITTED_DIRECT_CAM","|output_roller=",use_output_roller_bearings?output_roller_bearing_name:"OMITTED_DIRECT_PIN","|flange=",use_flange_bearing?flange_bearing_name:"OMITTED_PLAIN_JOURNAL","|ring_roller=",use_integrated_ring_ridges?"PRINTED_CASE_RIDGES":(ring_bearing_mode?str("CATALOG_",ring_bearing_name):"FABRICATED_SLEEVE")));
@@ -1079,6 +1214,12 @@ module output_face_rear_drill_template_2d(){union(){output_pin_holes_2d(output_p
 module output_hub_ring_2d(){
     difference(){circle(d=output_hub_od);circle(d=output_center_bore_d);output_pin_holes_2d(output_pin_hub_hole_d);inner_retainer_screw_holes_2d(inner_retainer_clear_d);}
 }
+module output_hub_ring_3d(){
+    difference(){
+        linear_extrude(height=output_hub_t,convexity=10) output_hub_ring_2d();
+        if(use_front_pilot) translate([0,0,-0.1]) cylinder(d=front_pilot_pocket_d,h=front_pilot_pocket_depth+0.1);
+    }
+}
 module inner_race_retainer_2d(){
     difference(){circle(d=inner_race_retainer_od);circle(d=output_center_bore_d);output_pin_holes_2d(output_pin_hub_hole_d+0.20);inner_retainer_screw_holes_2d(inner_retainer_clear_d);}
 }
@@ -1104,6 +1245,7 @@ module double_eccentric_sleeve_3d(){
             translate([-eccentricity,0,disc2_z]) cylinder(d=ecc_bushing_od,h=ecc_cam_length);
             translate([0,0,disc1_z]) cylinder(d=core_d,h=sleeve_journal_end_z-disc1_z);
             if(use_sleeve_collar) translate([0,0,sleeve_journal_end_z-0.01]) cylinder(d=sleeve_collar_od,h=sleeve_collar_length+0.01);
+            if(use_front_pilot) translate([0,0,max(sleeve_collar_end_z,sleeve_journal_end_z)-0.01]) cylinder(d=front_pilot_journal_d,h=front_journal_end_z-max(sleeve_collar_end_z,sleeve_journal_end_z)+0.01);
         }
         translate([0,0,disc1_z-1]) linear_extrude(height=sleeve_front_z-disc1_z+2) drive_bore_2d();
         if(use_sleeve_collar)
@@ -1137,6 +1279,9 @@ module motor_standoff_3d(){
                 }
         }
         translate([0,0,-0.1]) cylinder(d=coupled_spacer_pilot_pocket_d,h=coupled_spacer_pilot_pocket_depth+0.1);
+        // Rear support bearing bore from the motor side up to a shoulder behind the rear plate.
+        // (Spacer is drawn with its gearbox face at z=motor_mount_offset.)
+        if(use_rear_support) translate([0,0,-0.1]) cylinder(d=rear_support_pocket_d,h=motor_mount_offset+rear_support_shoulder_z+0.1);
     }
 }
 module coupled_input_shaft_3d(angle=0){
@@ -1146,6 +1291,7 @@ module coupled_input_shaft_3d(angle=0){
         union(){
             translate([0,0,coupled_hub_rear_z]) cylinder(d=active_coupled_hub_od,h=coupled_hub_length);
             cylinder(d=drive_shaft_d,h=integrated_shaft_front_z);
+            if(coupled_core_pilot) translate([0,0,coupled_pilot_start_z-0.01]) cylinder(d=min(front_pilot_journal_d,drive_shaft_d+0.02),h=front_journal_end_z-coupled_pilot_start_z+0.01);
             if(use_integrated_eccentric_shaft){
                 // Two bearing/direct-contact journals are part of the same shaft and
                 // therefore cannot lose their 180-degree phase relationship.
@@ -1195,18 +1341,24 @@ module plate3d(t,which){
     if(which=="rear") rear_plate_3d();
     else if(which=="front_pin") front_pin_plate_3d();
     else if(which=="case") case_ring_3d(t);
+    else if(which=="hub") output_hub_ring_3d();
     else linear_extrude(height=t,convexity=10)
         if(which=="rear_keeper") rear_keeper_plate_2d();
         else if(which=="race_retainer") bearing_race_retainer_2d();
         else if(which=="bearing_carrier") bearing_carrier_2d();
         else if(which=="disc") cycloid_disc_2d();
-        else if(which=="hub") output_hub_ring_2d();
+        else if(which=="hub_2d_unused") output_hub_ring_2d();
         else if(which=="inner_retainer") inner_race_retainer_2d();
 }
 module eccentric_bushing_3d(sign=1){linear_extrude(height=ecc_cam_length,convexity=6) eccentric_bushing_2d(sign);}
 module simple_bearing(id,od,w,alpha=1){
     color([0.22,0.22,0.24,alpha]) difference(){cylinder(d=od,h=w);translate([0,0,-0.1]) cylinder(d=id,h=w+0.2);}
     color([0.62,0.62,0.66,alpha]) difference(){cylinder(d=(od+id)/2,h=w);translate([0,0,-0.1]) cylinder(d=(od+id)/2-2,h=w+0.2);}
+}
+// Input support bearings at their true z (front pilot in the hub, rear support in the spacer).
+module input_support_bearings_3d(alpha=1){
+    if(use_front_pilot_bearing) translate([0,0,front_pilot_z]) simple_bearing(front_pilot_id,front_pilot_od,front_pilot_w,alpha);
+    if(use_rear_support) translate([0,0,rear_support_z]) simple_bearing(rear_support_id,rear_support_od,rear_support_w,alpha);
 }
 module rotation_marker(radius,z=0,h=1.2,size=2.2,alpha=1){
     // Visualization-only marker so rotation of cylindrical parts is obvious.
@@ -1232,6 +1384,7 @@ module input_stack_3d(){
     drive_angle=animate_preview ? 360*animation_input_revolutions*$t : 0;
     if(use_coupled_input_shaft) color([0.52,0.55,0.60,0.35]) translate([0,0,-motor_mount_offset]) motor_standoff_3d();
     input_drive_3d(drive_angle);
+    input_support_bearings_3d(0.6);
     rotate([0,0,drive_angle]){
         eccentric_sleeves_3d();
         translate([eccentricity,0,disc1_z]){
@@ -1302,6 +1455,7 @@ module assembly(){
         if(show_hardware && use_eccentric_bearings) translate([0,0,disc2_z]) simple_bearing(ecc_bearing_id,ecc_bearing_od,ecc_bearing_w);
     }
     if(show_hardware) rotate([0,0,drive_angle]) eccentric_sleeves_3d();
+    if(show_hardware) input_support_bearings_3d();
 
     // Front ring-pin closure.
     color([0.68,0.70,0.73]) translate([0,0,front_pin_z]) plate3d(front_pin_plate_t,"front_pin");
@@ -1316,7 +1470,7 @@ module assembly(){
     // Rotating flange assembly: inner retainer + hub ring + face plate.
     rotate([0,0,out_angle]){
         color([0.36,0.50,0.66]) translate([0,0,race_backer_z]) plate3d(race_retainer_t,"inner_retainer");
-        color([0.38,0.57,0.74]) translate([0,0,race_backer_z]) plate3d(output_hub_t,"hub");
+        color([0.38,0.57,0.74]) translate([0,0,output_hub_z]) plate3d(output_hub_t,"hub");
         color([0.27,0.48,0.69]) translate([0,0,output_face_z]) output_face_plate_3d();
         if(show_rotation_markers) translate([0,0,output_face_z+output_face_t+0.6]) rotation_marker(output_face_d/2-5,0,1.2,3.0);
 
@@ -1391,11 +1545,12 @@ module motion_demo(){
         if(show_hardware && use_eccentric_bearings) translate([0,0,disc2_z]) simple_bearing(ecc_bearing_id,ecc_bearing_od,ecc_bearing_w,0.42);
     }
     if(show_hardware) rotate([0,0,drive_angle]) eccentric_sleeves_3d(0.92);
+    if(show_hardware) input_support_bearings_3d(0.6);
 
     // Output pins and a ghosted flange rotate at the reduced output angle.
     rotate([0,0,out_angle]){
         color([0.27,0.48,0.69,0.18]) translate([0,0,output_face_z]) output_face_plate_3d();
-        color([0.38,0.57,0.74,0.28]) translate([0,0,race_backer_z]) plate3d(output_hub_t,"hub");
+        color([0.38,0.57,0.74,0.28]) translate([0,0,output_hub_z]) plate3d(output_hub_t,"hub");
         if(show_rotation_markers) translate([0,0,output_face_z+output_face_t+0.8]) rotation_marker(output_face_d/2-5,0,1.2,3.0);
         if(show_hardware){
             for(i=[0:output_pin_count-1]){
@@ -1438,6 +1593,7 @@ module exploded(){
         if(use_coupled_input_shaft){
             color([0.52,0.55,0.60]) translate([0,0,z_motor+body_len+g]) motor_standoff_3d();
             color([0.34,0.36,0.40]) translate([0,0,z_motor+body_len+motor_mount_offset+2*g]) coupled_input_shaft_3d();
+            if(use_rear_support) translate([plate_r*0.55,0,z_motor+body_len+g]) simple_bearing(rear_support_id,rear_support_od,rear_support_w);
         }
     }
     if(use_rear_keeper) color([0.48,0.50,0.53]) translate([0,0,z_keeper]) plate3d(rear_keeper_t,"rear_keeper");
@@ -1466,6 +1622,7 @@ module exploded(){
     if(use_flange_bearing) color([0.46,0.48,0.51]) translate([0,0,z_raceback]) plate3d(race_retainer_t,"race_retainer");
     color([0.36,0.50,0.66]) translate([0,0,z_innerret]) plate3d(race_retainer_t,"inner_retainer");
     color([0.38,0.57,0.74]) translate([0,0,z_hub]) plate3d(output_hub_t,"hub");
+    if(show_hardware && use_front_pilot_bearing) translate([plate_r*0.55,0,z_hub]) simple_bearing(front_pilot_id,front_pilot_od,front_pilot_w);
     if(show_hardware && use_flange_bearing) translate([0,0,z_bearing]) simple_bearing(flange_bearing_id,flange_bearing_od,flange_bearing_w);
     color([0.60,0.62,0.65]) translate([0,0,z_carrier]) plate3d(output_support_t,"bearing_carrier");
     if(use_flange_bearing) color([0.46,0.48,0.51]) translate([0,0,z_frontret]) plate3d(race_retainer_t,"race_retainer");
@@ -1560,6 +1717,8 @@ module layout_3d(){
     if(show_hardware){
         if(use_eccentric_bearings) translate([-0.5*cell,-3*cell,0]) simple_bearing(ecc_bearing_id,ecc_bearing_od,ecc_bearing_w);
         color([0.28,0.28,0.30]) translate([0.5*cell,-3*cell,0]) cylinder(d=output_pin_d,h=output_pin_length);
+        if(use_front_pilot_bearing) translate([-1.5*cell,-3*cell,0]) simple_bearing(front_pilot_id,front_pilot_od,front_pilot_w);
+        if(use_rear_support) translate([1.5*cell,-3*cell,0]) simple_bearing(rear_support_id,rear_support_od,rear_support_w);
     }
 }
 
