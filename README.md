@@ -111,7 +111,7 @@ These are geometric and assembly-clearance checks only. They are not torque, fat
 
 ## History
 
-Each release is a git tag (`v1.10`, `v1.11`, `v1.12`, `v1.13`) with notes in `docs/`: [v1.13](docs/RELEASE_NOTES_v1_13.md) (library split, legacy removal, CI), [v1.12](docs/RELEASE_NOTES_v1_12.md) (input support bearings), [v1.11](docs/RELEASE_NOTES_v1_11.md) (geometry and fit corrections), [v1.8](docs/RELEASE_NOTES_v1_8.md), [v1.6](docs/RELEASE_NOTES_v1_6.md). Earlier single-file versions of the design are available at those tags.
+Release commits are tagged `v1.10`, `v1.11`, `v1.12` and `v1.13` (the commit list and tag commands are in the v1.13 notes), with notes in `docs/`: [v1.13](docs/RELEASE_NOTES_v1_13.md) (library split, legacy removal, CI), [v1.12](docs/RELEASE_NOTES_v1_12.md) (input support bearings), [v1.11](docs/RELEASE_NOTES_v1_11.md) (geometry and fit corrections), [v1.8](docs/RELEASE_NOTES_v1_8.md), [v1.6](docs/RELEASE_NOTES_v1_6.md). Earlier single-file versions of the design are available at those tags.
 
 ## Project status
 
