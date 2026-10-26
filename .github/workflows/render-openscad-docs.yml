@@ -1,11 +1,16 @@
-name: Render OpenSCAD documentation
+name: Validate presets and render documentation
 
 on:
   push:
-    branches: [v1.8-case-lobes-presets]
+    branches: [main]
     paths:
-      - 'src/cnc_nema_cycloidal_gearbox_pancake_v1_8.scad'
-      - 'src/cnc_nema_cycloidal_gearbox_pancake_v1_8.json'
+      - 'src/**'
+      - 'tools/**'
+      - '.github/workflows/render-openscad-docs.yml'
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'tools/**'
       - '.github/workflows/render-openscad-docs.yml'
   workflow_dispatch:
 
@@ -13,7 +18,39 @@ permissions:
   contents: write
 
 jobs:
-  render:
+  validate:
+    name: Compile every preset x simplification level x input architecture
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install OpenSCAD
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y openscad
+          openscad --version
+      - name: Run the validation matrix
+        run: python3 tools/validate_presets.py --csv validation_matrix.csv
+      - name: Export every part of the default preset as DXF and STL
+        run: |
+          set -e
+          mkdir -p export
+          for p in rear_plate case_ring front_pin_plate bearing_race_retainer bearing_carrier cycloid_disc output_face_plate output_hub_ring inner_race_retainer; do
+            openscad -o "export/$p.dxf" -D "part=\"$p\"" src/cycloidal_gearbox.scad
+            openscad -o "export/$p.stl" -D "part=\"$p\"" -D 'export_mode="3D solid"' src/cycloidal_gearbox.scad
+          done
+          openscad -o export/eccentric_sleeve.stl -D 'part="eccentric_sleeve"' src/cycloidal_gearbox.scad
+          ls -la export
+      - uses: actions/upload-artifact@v4
+        with:
+          name: validation-and-exports
+          path: |
+            validation_matrix.csv
+            export/
+
+  render-docs:
+    name: Render README images
+    needs: validate
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,36 +58,14 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y openscad xvfb imagemagick
-      - name: Render full-resolution lossless PNGs
-        run: |
-          set -e
-          SCAD=src/cnc_nema_cycloidal_gearbox_pancake_v1_8.scad
-          PARAMS=src/cnc_nema_cycloidal_gearbox_pancake_v1_8.json
-          PRESET="NEMA17 Commodity R15"
-          mkdir -p docs/images
-          xvfb-run -a openscad -q -o docs/images/assembly_v1_8.png --imgsize=1600,1200 --viewall --autocenter -p "$PARAMS" -P "$PRESET" -D 'part="assembly"' "$SCAD"
-          xvfb-run -a openscad -q -o docs/images/exploded_v1_8.png --imgsize=1600,1200 --viewall --autocenter -p "$PARAMS" -P "$PRESET" -D 'part="exploded"' "$SCAD"
-          xvfb-run -a openscad -q -o docs/images/input_stack_v1_8.png --imgsize=1600,1200 --viewall --autocenter -p "$PARAMS" -P "$PRESET" -D 'part="input_stack"' "$SCAD"
-          xvfb-run -a openscad -q -o docs/images/layout_3d_v1_8.png --imgsize=1800,1200 --viewall --autocenter -p "$PARAMS" -P "$PRESET" -D 'part="layout_3d"' "$SCAD"
-          xvfb-run -a openscad -q -o docs/images/case_rooted_lobes_top_v1_8.png --imgsize=1400,1400 --projection=o --camera=0,0,0,0,0,0,180 --viewall --autocenter -p "$PARAMS" -P "$PRESET" -D 'part="case_ring"' -D 'simplification_level="Integrated case lobes"' "$SCAD"
-          xvfb-run -a openscad -q -o docs/images/simplified_lobes_assembly_v1_8.png --imgsize=1600,1200 --viewall --autocenter -p "$PARAMS" -P "$PRESET" -D 'part="assembly"' -D 'simplification_level="Integrated case lobes"' "$SCAD"
-      - name: Render motion GIF
-        run: |
-          set -e
-          SCAD=src/cnc_nema_cycloidal_gearbox_pancake_v1_8.scad
-          PARAMS=src/cnc_nema_cycloidal_gearbox_pancake_v1_8.json
-          mkdir -p docs/images/motion_frames
-          cd docs/images/motion_frames
-          xvfb-run -a openscad -q -o frame.png --animate 24 --imgsize=800,640 --viewall --autocenter -p ../../../"$PARAMS" -P "NEMA17 Commodity R15" -D 'part="motion_demo"' ../../../"$SCAD"
-          convert -delay 10 -loop 0 frame*.png ../motion_demo_v1_8.gif
-          cd ../../..
-          rm -rf docs/images/motion_frames
+      - name: Render images and motion GIF
+        run: tools/render_docs.sh
       - name: Commit rendered documentation
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/images
           if ! git diff --cached --quiet; then
-            git commit -m "Render v1.8 OpenSCAD documentation images"
+            git commit -m "Render OpenSCAD documentation images"
             git push
           fi
