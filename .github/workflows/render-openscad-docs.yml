@@ -6,11 +6,13 @@ on:
     paths:
       - 'src/**'
       - 'tools/**'
+      - 'web/**'
       - '.github/workflows/render-openscad-docs.yml'
   pull_request:
     paths:
       - 'src/**'
       - 'tools/**'
+      - 'web/**'
       - '.github/workflows/render-openscad-docs.yml'
   workflow_dispatch:
 
@@ -46,6 +48,23 @@ jobs:
           path: |
             validation_matrix.csv
             export/
+
+  web-generator:
+    name: Web generator in headless Chromium
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Every Customizer parameter has a place in the web form
+        run: python3 tools/check_web_schema.py
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@1.49.1
+          npx playwright install --with-deps chromium
+      - name: Check, preview and export in the browser
+        run: node tools/web_smoke_test.mjs
 
   render-docs:
     name: Render README images

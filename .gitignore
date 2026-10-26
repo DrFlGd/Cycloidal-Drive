@@ -11,3 +11,6 @@
 Thumbs.db
 *.swp
 *~
+
+# Web generator test tooling
+node_modules/
